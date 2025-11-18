@@ -1,8 +1,6 @@
 ########## Chapter 2 Group 3 Figures ############
-#### Krish Singh
-#### Date: 17-10-24
-
-
+#### Krish K Singh
+#### Date: 17-10-24 (Last Updated: 29.07.25)
 
 # Library -----------------------------------------------------------------
 
@@ -21,29 +19,14 @@ library(grid)
 library(tidyr)
 library(lubridate)
 
-
 # Functions ---------------------------------------------------------------
-
 
 # Main --------------------------------------------------------------------
 
-
-
 # Set up ------------------------------------------------------------------
-
-
 # Set up the thiel-sen_regs 
-
 theil_sen_reg <- read.csv('../DATASETS/AusPlots_Theil_Sen_Regression_Stats/AusPlots_Theil_Sen_Regression_Stats_Signf.csv')
 theil_sen_reg_copy <- theil_sen_reg
-
-dom_veg <- read.csv('../DATASETS/AusPlots_Extracted_Data/Final/AusPlots_Agg_VegType_PC_Height_Rule.csv') %>%
-  select(c('site_location_name', 'vegetation_type'))
-
-combin <- theil_sen_reg_copy %>%
-  left_join(dom_veg, by = 'site_location_name')
-
-# Set up the short-term slopes 
 
 # Load AusPlots data 
 evaluation_fc <- read.csv('../DATASETS/AusPlots_Extracted_Data/Final/DEA_FC_Ground_Truth_Evaluation.csv') %>%
@@ -52,27 +35,27 @@ evaluation_fc <- read.csv('../DATASETS/AusPlots_Extracted_Data/Final/DEA_FC_Grou
 
 # Looking at the varying number of NAs between in-situ for green, brown, bs
 # Its best to calculate the change differently
-# Additionally, we are not considering the length of time into our change calcs 
-
 evaluation_list <- list(green_fc = na.omit(evaluation_fc[,c('site_unique', 'site_location_name', 'green', 'pv_filter', 'time')]),
                         brown_fc = na.omit(evaluation_fc[,c('site_unique', 'site_location_name', 'brown', 'npv_filter', 'time')]),
                         bs_fc = na.omit(evaluation_fc[,c('site_unique', 'site_location_name', 'bare', 'bs_filter', 'time')]))
 
 
-
+# Select only Sites with > 1 visits PER FC component
+# NOTE: Even if a site has > 1 visits, any na in PV, NPV, BS will exclude the site from the dataset
+#       But this proccess is independent of the FC component, i.e. NA in PV will not affect the selection process
+#       of the NPV. 
 evaluation_list <- lapply(evaluation_list, FUN = function(x) {
   counts.df <- as.data.frame(table(x$site_location_name)) %>%
-    subset(Freq >= 2)  # Remove sites that were not revisited
+    subset(Freq >= 2) 
   x <- subset(x, site_location_name %in% unique(counts.df$Var1)) # now subset the dataframe by sites with more than 1 visit
   return(x)
 })
 
-
-counts.df <- as.data.frame(table(evaluation_list$green_fc$site_location_name)) %>%
-  subset(Freq >= 2)  # Remove sites that were not revisited
-x <- subset(evaluation_list$green_fc, site_location_name %in% unique(counts.df$Var1)) # now subset the dataframe by sites with more than 1 visit
-
-# Greenness 
+# Perform Linear Modelling ------------------------------------------------
+# Note: Linear model is Fc component ~ time (in days), so
+#       the slope will be Fc/day. 
+#       365 * FC/day ~= FC/yr
+# PV ----------------------------------------------------------------------
 stats_fc_pv <- evaluation_list[['green_fc']] %>%
   group_by(site_location_name) %>%
   arrange('time') %>%
@@ -82,13 +65,15 @@ stats_fc_pv <- evaluation_list[['green_fc']] %>%
     data.frame(
       intercept_rs_pv = coef(model)[1],
       slope_rs_pv = coef(model)[2],
-      intercept_og_pv = coef(model2)[1],
-      slope_og_pv = coef(model2)[2],
+      slope_rs_pv_yr = coef(model)[2]*365,
+      intercept_insitu_pv = coef(model2)[1],
+      slope_insitu_pv = coef(model2)[2],
+      slope_insitu_pv_yr = coef(model2)[2]*365,
       n_samples = nrow(model$model)
     )
   })
 
-# Brownness
+# NPV ---------------------------------------------------------------------
 stats_fc_npv <- evaluation_list[['brown_fc']] %>%
   group_by(site_location_name) %>%
   arrange('time') %>%
@@ -98,13 +83,15 @@ stats_fc_npv <- evaluation_list[['brown_fc']] %>%
     data.frame(
       intercept_rs_npv = coef(model)[1],
       slope_rs_npv = coef(model)[2],
-      intercept_og_npv = coef(model2)[1],
-      slope_og_npv = coef(model2)[2],
+      slope_rs_npv_yr = coef(model)[2]*365,
+      intercept_insitu_npv = coef(model2)[1],
+      slope_insitu_npv = coef(model2)[2],
+      slope_insitu_npv_yr = coef(model2)[2]*365,
       n_samples = nrow(model$model)
     )
   })
 
-# Bare soil
+# Bare Soil ---------------------------------------------------------------
 stats_fc_bs <- evaluation_list[['bs_fc']] %>%
   group_by(site_location_name) %>%
   arrange('time') %>%
@@ -114,77 +101,95 @@ stats_fc_bs <- evaluation_list[['bs_fc']] %>%
     data.frame(
       intercept_rs_bs = coef(model)[1],
       slope_rs_bs = coef(model)[2],
-      intercept_og_bs = coef(model2)[1],
-      slope_og_bs = coef(model2)[2],
+      slope_rs_bs_yr = coef(model)[2]*365,
+      intercept_insitu_bs = coef(model2)[1],
+      slope_insitu_bs = coef(model2)[2],
+      slope_insitu_bs_yr = coef(model2)[2]*365,
       n_samples = nrow(model$model)
     )
   })
 
-# Set up Part 3 - Combining theils and short term trend -------------------
-
+# Combine Theil-Sen Slopes with Short-term Trend --------------------------
 test <- stats_fc_pv %>%
   left_join(stats_fc_npv, by = c('site_location_name', 'n_samples') ) %>%
   left_join(stats_fc_bs, by = c('site_location_name', 'n_samples')) %>%
-  left_join(combin, by = 'site_location_name')
-
-
-
-
+  left_join(theil_sen_reg_copy, by = c('site_location_name'))
   
 # Graphic -----------------------------------------------------------------
-
 lims <- c(-25, 25)
-# Greenness
-pv <- ggplot(data = test, mapping = aes(y = pv_filter_slope_yr, x = slope_rs_pv *365)) +
-  geom_point() + geom_smooth(method =  'lm', size = 0.5) + theme_bw() + ggpmisc::stat_poly_eq(mapping = use_label(c("R2")), method = 'lm') +
+
+# PV ----------------------------------------------------------------------
+pv_insitu <- ggplot(data = test, mapping = aes(y = pv_filter_slope_yr, x = slope_insitu_pv_yr)) +
+  geom_point() + geom_smooth(method =  'lm', size = 0.5) +
+  theme_bw() +
+  ggpmisc::stat_poly_eq(mapping = use_label(c("R2")), method = 'lm') +
   geom_abline(color = 'red', lty = 2, size = 1) +
-  ylab('Long Term Trend (PV/yr)') + xlab('Short Term Trend (PV/yr)') +  coord_fixed(ratio= 1, xlim = lims, ylim = lims)
+  ylab('Long Term Trend (%PV/yr)') +
+  xlab('Short Term Trend (in-situ %PV/yr)') +
+  coord_fixed(ratio= 1, xlim = lims, ylim = lims)
 
-# Brownness
-npv <- ggplot(data = test, mapping = aes(y = npv_filter_slope_yr, x = slope_rs_npv * 365)) +
-  geom_point() + geom_smooth(method =  'lm', size = 0.5) + theme_bw() + ggpmisc::stat_poly_eq(mapping = use_label(c("R2")), method = 'lm') +
+pv_dea <- ggplot(data = test, mapping = aes(y = pv_filter_slope_yr, x = slope_rs_pv_yr)) +
+  geom_point() + geom_smooth(method =  'lm', size = 0.5) +
+  theme_bw() +
+  ggpmisc::stat_poly_eq(mapping = use_label(c("R2")), method = 'lm') +
   geom_abline(color = 'red', lty = 2, size = 1) +
-  ylab('Long Term Trend (NPV/yr)') + xlab('Short Term Trend (NPV/yr)') + coord_fixed(ratio= 1, xlim = lims, ylim = lims)
+  ylab('Long Term Trend (%PV/yr)') +
+  xlab('Short Term Trend (DEA %PV/yr)') +
+  coord_fixed(ratio= 1, xlim = lims, ylim = lims)
 
-# Bare Soil
-bs <- ggplot(data = test, mapping = aes(y = bs_filter_slope_yr, x = slope_rs_bs * 365)) +
-  geom_point() + geom_smooth(method =  'lm', size = 0.5) + theme_bw() + ggpmisc::stat_poly_eq(mapping = use_label(c("R2")), method = 'lm') +
+# NPV ---------------------------------------------------------------------
+npv_insitu <- ggplot(data = test, mapping = aes(y = npv_filter_slope_yr, x = slope_insitu_npv_yr)) +
+  geom_point() + geom_smooth(method =  'lm', size = 0.5) + 
+  theme_bw() +
+  ggpmisc::stat_poly_eq(mapping = use_label(c("R2")), method = 'lm') +
   geom_abline(color = 'red', lty = 2, size = 1) +
-  ylab('Long Term Trend (BS/yr)') + xlab('Short Term Trend (BS/yr)')  + coord_fixed(ratio= 1, xlim = lims, ylim = lims)
+  ylab('Long Term Trend (%NPV/yr)') +
+  xlab('Short Term Trend (in-situ %NPV/yr)') + 
+  coord_fixed(ratio= 1, xlim = lims, ylim = lims)
 
+npv_dea <- ggplot(data = test, mapping = aes(y = npv_filter_slope_yr, x = slope_rs_npv_yr)) +
+  geom_point() + geom_smooth(method =  'lm', size = 0.5) + 
+  theme_bw() +
+  ggpmisc::stat_poly_eq(mapping = use_label(c("R2")), method = 'lm') +
+  geom_abline(color = 'red', lty = 2, size = 1) +
+  ylab('Long Term Trend (%NPV/yr)') +
+  xlab('Short Term Trend (DEA %NPV/yr)') + 
+  coord_fixed(ratio= 1, xlim = lims, ylim = lims)
 
-combined_plot <- plot_grid(pv, npv, bs, ncol = 3, labels = c("a)", "b)", "c)"))
-combined_plot
+# Bare Soil ---------------------------------------------------------------
+bs_insitu <- ggplot(data = test, mapping = aes(y = bs_filter_slope_yr, x = slope_insitu_bs_yr)) +
+  geom_point() + geom_smooth(method =  'lm', size = 0.5) + 
+  theme_bw() + ggpmisc::stat_poly_eq(mapping = use_label(c("R2")), method = 'lm') +
+  geom_abline(color = 'red', lty = 2, size = 1) +
+  ylab('Long Term Trend (%BS/yr)') +
+  xlab('Short Term Trend (in-situ %BS/yr)') + 
+  coord_fixed(ratio= 1, xlim = lims, ylim = lims)
 
+bs_dea <- ggplot(data = test, mapping = aes(y = bs_filter_slope_yr, x = slope_rs_bs_yr)) +
+  geom_point() + geom_smooth(method =  'lm', size = 0.5) + 
+  theme_bw() + ggpmisc::stat_poly_eq(mapping = use_label(c("R2")), method = 'lm') +
+  geom_abline(color = 'red', lty = 2, size = 1) +
+  ylab('Long Term Trend (%BS/yr)') +
+  xlab('Short Term Trend (DEA %BS/yr)') + 
+  coord_fixed(ratio= 1, xlim = lims, ylim = lims)
 
+# Combine Plot ------------------------------------------------------------
+combined_plot_insitu <- plot_grid(pv_insitu, npv_insitu, 
+                           bs_insitu, ncol = 3,
+                           labels = c("a)", "b)", "c)"))
+combined_plot_insitu
 
-# Adding Example Sites ----------------------------------------------------
+combined_plot_DEA <- plot_grid(pv_dea, npv_dea, 
+                                  bs_dea, ncol = 3,
+                                  labels = c("d)", "e)", "f)"))
+combined_plot_DEA
 
-# SAABHC0004
-
-example_site <- 'SAABHC0004'
-dea_fc_path <- '../DATASETS/DEA_FC_PROCESSED/MODELLED_PREPROCESSED/'
-dea_fc_path <- paste0(dea_fc_path, 'Input_DataSet_', example_site, '.csv')
-dea_fc <- read.csv(dea_fc_path)
-
-# Read our evaluation dataset, which has the closest DEA FC timestamp to sites visited 
-evaluation.data.2 <- read.csv('../DATASETS/AusPlots_Extracted_Data/Final/DEA_FC_Ground_Truth_Evaluation_with_percentiles_.csv') %>%
-  subset(site_location_name == example_site) %>%
-  select(!other) %>%
-  na.omit()
-
-theil_sen_reg <- read.csv('../DATASETS/AusPlots_Theil_Sen_Regression_Stats/AusPlots_Theil_Sen_Regression_Stats_Signf.csv')
-theil_sen_reg_subset <- subset(theil_sen_reg, site_location_name == example_site)
-
-
-## Since for the mean time I just want to show PV:
-
-
-og_model <- lm(formula = green~as.Date(time), data = evaluation.data.2)
-rs_model <- lm(formula = pv_filter~as.Date(time), data = evaluation.data.2)
+# Add PV timeseries of some example sites ---------------------------------
+stroke <- 0.7
+shape <- 4
+alpha <- 0.7
 
 fraction <- 'pv'
-
 if (fraction == 'pv'){
   colour <- 'darkgreen'
   og_name <- 'green'
@@ -196,15 +201,20 @@ if (fraction == 'pv'){
   og_name <- 'bare'
 }
 
+# SAABHC0004 --------------------------------------------------------------
+example_site <- 'SAABHC0004'
+dea_fc_path <- '../DATASETS/DEA_FC_PROCESSED/MODELLED_PREPROCESSED/'
+dea_fc_path <- paste0(dea_fc_path, 'Input_DataSet_', example_site, '.csv')
+dea_fc <- read.csv(dea_fc_path)
 
+evaluation.data.2 <- evaluation_fc %>%
+  subset(site_location_name == example_site) %>%
+  select(!other) %>%
+  na.omit()
+
+theil_sen_reg_subset <- subset(test, site_location_name == example_site)
 pv_max <- max(max(dea_fc$pv), max(evaluation.data.2$green), max(evaluation.data.2$pv_filter))
 celing <- pv_max + 30
-
-evaluation.data.2
-
-stroke <- 0.7
-shape <- 4
-alpha <- 0.7
 
 t <- ggplot(data = dea_fc, aes(x = as.Date(time)))  +
   # the main time series 
@@ -250,71 +260,35 @@ t <- ggplot(data = dea_fc, aes(x = as.Date(time)))  +
   theme_bw() +
   annotate('text', x = as.Date('1987-01-01'), 
            y = celing - 5, 
-           label = paste0("LT (DEA FC)", ' = ',round(theil_sen_reg_subset[[paste0(fraction, '_filter', '_slope_yr')]],4), ' %PV/yr'), 
-           color = "red", size = 3,
+           label = paste0("LT (DEA FC)", ' = ',round(theil_sen_reg_subset[[paste0(fraction, '_filter', '_slope_yr')]],2), ' %PV/yr'), 
+           color = "red", size = 3.5,
            hjust = 0) +
   annotate('text', x = as.Date('1987-01-01'), 
            y = celing - 5 - 1*(10), 
-           label = paste0('ST (AusPlots FC)', ' = ', round(coef(og_model)[[2]] * 365,4), ' %PV/yr'),
-           color = "black", size = 3,
+           label = paste0('ST (AusPlots FC)', ' = ', round(theil_sen_reg_subset[[paste0('slope_insitu_',fraction ,'_yr')]],2), ' %PV/yr'),
+           color = "black", size = 3.5,
            hjust = 0) +
   annotate('text', x = as.Date('1987-01-01'),
            y = celing - 5 - 2*(10), 
-           label = paste0('ST (DEA FC)',' = ', round(coef(rs_model)[[2]] * 365,4), ' %PV/yr'),
+           label = paste0('ST (DEA FC)',' = ', round(theil_sen_reg_subset[[paste0('slope_rs_', fraction, '_yr')]],2), ' %PV/yr'),
            color = "blue", 
-           size = 3,
+           size = 3.5,
            hjust = 0) 
-  
 
-
-plot(t)
-
-
-# QDAEIU0006
-
+# QDAEIUQ0006 -------------------------------------------------------------
 example_site <- 'QDAEIU0006'
 dea_fc_path <- '../DATASETS/DEA_FC_PROCESSED/MODELLED_PREPROCESSED/'
 dea_fc_path <- paste0(dea_fc_path, 'Input_DataSet_', example_site, '.csv')
 dea_fc <- read.csv(dea_fc_path)
 
-# Read our evaluation dataset, which has the closest DEA FC timestamp to sites visited 
-evaluation.data.2 <- read.csv('../DATASETS/AusPlots_Extracted_Data/Final/DEA_FC_Ground_Truth_Evaluation_with_percentiles_.csv') %>%
+evaluation.data.2 <- evaluation_fc %>%
   subset(site_location_name == example_site) %>%
   select(!other) %>%
   na.omit()
 
-theil_sen_reg <- read.csv('../DATASETS/AusPlots_Theil_Sen_Regression_Stats/AusPlots_Theil_Sen_Regression_Stats_Signf.csv')
-theil_sen_reg_subset <- subset(theil_sen_reg, site_location_name == example_site)
-
-
-## Since for the mean time I just want to show PV:
-
-
-og_model <- lm(formula = green~as.Date(time), data = evaluation.data.2)
-rs_model <- lm(formula = pv_filter~as.Date(time), data = evaluation.data.2)
-
-fraction <- 'pv'
-
-if (fraction == 'pv'){
-  colour <- 'darkgreen'
-  og_name <- 'green'
-} else if (fraction == 'npv') {
-  colour <- 'steelblue'
-  og_name <- 'brown'
-} else if (fraction == 'bs') {
-  colour <- 'darkred'
-  og_name <- 'bare'
-}
-
-
+theil_sen_reg_subset <- subset(test, site_location_name == example_site)
 pv_max <- max(max(dea_fc$pv), max(evaluation.data.2$green), max(evaluation.data.2$pv_filter))
 celing <- pv_max + 30
-
-evaluation.data.2
-
-stroke <- 0.7
-shape <- 4
-alpha <- 0.7
 
 t2 <- ggplot(data = dea_fc, aes(x = as.Date(time)))  +
   # the main time series 
@@ -360,196 +334,39 @@ t2 <- ggplot(data = dea_fc, aes(x = as.Date(time)))  +
   theme_bw() +
   annotate('text', x = as.Date('1987-01-01'), 
            y = celing - 5, 
-           label = paste0("LT (DEA FC)", ' = ',round(theil_sen_reg_subset[[paste0(fraction, '_filter', '_slope_yr')]],4), ' %PV/yr'), 
-           color = "red", size = 3,
+           label = paste0("LT (DEA FC)", ' = ',round(theil_sen_reg_subset[[paste0(fraction, '_filter', '_slope_yr')]],2), ' %PV/yr'), 
+           color = "red", size = 3.5,
            hjust = 0) +
   annotate('text', x = as.Date('1987-01-01'), 
            y = celing - 5 - 1*(10), 
-           label = paste0('ST (AusPlots FC)', ' = ', round(coef(og_model)[[2]] * 365,4), ' %PV/yr'),
-           color = "black", size = 3,
+           label = paste0('ST (AusPlots FC)', ' = ', round(theil_sen_reg_subset[[paste0('slope_insitu_',fraction ,'_yr')]],2), ' %PV/yr'),
+           color = "black", size = 3.5,
            hjust = 0) +
   annotate('text', x = as.Date('1987-01-01'),
            y = celing - 5 - 2*(10), 
-           label = paste0('ST (DEA FC)',' = ', round(coef(rs_model)[[2]] * 365,4), ' %PV/yr'),
+           label = paste0('ST (DEA FC)',' = ', round(theil_sen_reg_subset[[paste0('slope_rs_', fraction, '_yr')]],2), ' %PV/yr'),
            color = "blue", 
-           size = 3,
+           size = 3.5,
            hjust = 0) 
 
-
-plot(t2)
-
-
-
-# Combining the Plots
-combined_plot
-
-
-plot_grid(combined_plot, t, t2, cols =1,
-          labels = c(' ',
-                     'd)', 'e)'))
-
-
-
-
-# Group by veg type:
-
-lims <- c(-25, 25)
-pv <- ggplot(data = test, mapping = aes(y = pv_filter_slope_yr, x = slope_rs_pv*365)) +
-  geom_point() + 
-  geom_smooth(method =  'lm', size = 0.5) +
-  theme_bw() + 
-  ggpmisc::stat_poly_eq(mapping = use_label(c("eq", "R2", 'p'))) +
-  geom_abline(color = 'red', lty = 2, size = 1) +
-  coord_fixed(ratio=1) +
-  ylab('Long Term Trend (PV/yr)') + 
-  xlab('Short Term Trend (PV/yr)') + 
-  facet_grid(~vegetation_type)
-pv
-
-
-
-
-
-
-
-
-
-
-
-npv <- ggplot(data = test, mapping = aes(y = npv_filter_slope, x = slope_rs_npv)) +
-  geom_point() + geom_smooth(method =  'lm', size = 0.5) + theme_bw() + ggpmisc::stat_poly_eq(mapping = use_label(c("eq", "R2", 'p'))) +
-  geom_abline(color = 'red', lty = 2, size = 1) + coord_fixed(ratio=1, ylim = c(-0.1, 0.1), xlim = c(-0.1, 0.1)) +
-  ylab('Long Term Trend (NPV/day)') + xlab('Short Term Trend (NPV/day)')+ facet_grid(~vegetation_type)
-npv
-
-bs <- ggplot(data = test, mapping = aes(y = bs_filter_slope, x = slope_rs_bs)) +
-  geom_point() + geom_smooth(method =  'lm', size = 0.5) + theme_bw() + ggpmisc::stat_poly_eq(mapping = use_label(c("eq", "R2", 'p'))) +
-  geom_abline(color = 'red', lty = 2, size = 1) + coord_fixed(ratio=1, ylim = c(-0.1, 0.1), xlim = c(-0.1, 0.1)) +
-  ylab('Long Term Trend (BS/day)') + xlab('Short Term Trend (BS/day)') + facet_grid(~vegetation_type)
-bs
-
-
-
-
-
-
-# What if I remove the non-signficant slopes 
-test_sign <- subset(test, subset = (pv_filter_signf == T &
-                                    npv_filter_signf == T &
-                                    bs_filter_signf == T))
-
-pv <- ggplot(data = test_sign, mapping = aes(y = pv_filter_slope, x = slope_rs_pv)) +
-  geom_point() + geom_smooth(method =  'lm', size = 0.5) + theme_bw() + ggpmisc::stat_poly_eq(mapping = use_label(c("eq", "R2", 'p'))) +
-  geom_abline(color = 'red', lty = 2, size = 1) + coord_fixed(ratio=1, ylim = c(-0.1, 0.1), xlim = c(-0.1, 0.1)) +
-  ylab('Long Term Trend (PV/day)') + xlab('Short Term Trend (PV/day)')
-
-# Brownness
-npv <- ggplot(data = test_sign, mapping = aes(y = npv_filter_slope, x = slope_rs_npv)) +
-  geom_point() + geom_smooth(method =  'lm', size = 0.5) + theme_bw() + ggpmisc::stat_poly_eq(mapping = use_label(c("eq", "R2", 'p'))) +
-  geom_abline(color = 'red', lty = 2, size = 1) + coord_fixed(ratio=1, ylim = c(-0.1, 0.1), xlim = c(-0.1, 0.1)) +
-  ylab('Long Term Trend (NPV/day)') + xlab('Short Term Trend (NPV/day)')
-
-# Bare Soil
-bs <- ggplot(data = test_sign, mapping = aes(y = bs_filter_slope, x = slope_rs_bs)) +
-  geom_point() + geom_smooth(method =  'lm', size = 0.5) + theme_bw() + ggpmisc::stat_poly_eq(mapping = use_label(c("eq", "R2", 'p'))) +
-  geom_abline(color = 'red', lty = 2, size = 1) + coord_fixed(ratio=1, ylim = c(-0.1, 0.1), xlim = c(-0.1, 0.1)) +
-  ylab('Long Term Trend (BS/day)') + xlab('Short Term Trend (BS/day)')
-
-
-combined_plot <- plot_grid(pv, npv, bs, ncol = 2, labels = c("a)", "b)", "c)"))
-combined_plot
-
-# On ground and RS slope --------------------------------------------------
-
-# Greenness
-pv <- ggplot(data = test, mapping = aes(y = slope_og_pv, x = slope_rs_pv)) +
-  geom_point() + geom_smooth(method =  'lm', size = 0.5) + theme_bw() + ggpmisc::stat_poly_eq(mapping = use_label(c("eq", "R2", 'p'))) +
-  geom_abline(color = 'red', lty = 2, size = 1) + coord_fixed(ratio=1, ylim = c(-0.1, 0.1), xlim = c(-0.1, 0.1)) +
-  ylab('Long Term Trend (PV/day)') + xlab('Short Term Trend (PV/day)')
-
-# Brownness
-npv <- ggplot(data = test, mapping = aes(y = slope_og_npv, x = slope_rs_npv)) +
-  geom_point() + geom_smooth(method =  'lm', size = 0.5) + theme_bw() + ggpmisc::stat_poly_eq(mapping = use_label(c("eq", "R2", 'p'))) +
-  geom_abline(color = 'red', lty = 2, size = 1) + coord_fixed(ratio=1, ylim = c(-0.1, 0.1), xlim = c(-0.1, 0.1)) +
-  ylab('Long Term Trend (NPV/day)') + xlab('Short Term Trend (NPV/day)')
-
-# Bare Soil
-bs <- ggplot(data = test, mapping = aes(y = slope_og_bs, x = slope_rs_bs)) +
-  geom_point() + geom_smooth(method =  'lm', size = 0.5) + theme_bw() + ggpmisc::stat_poly_eq(mapping = use_label(c("eq", "R2", 'p'))) +
-  geom_abline(color = 'red', lty = 2, size = 1) + coord_fixed(ratio=1, ylim = c(-0.1, 0.1), xlim = c(-0.1, 0.1)) +
-  ylab('Long Term Trend (BS/day)') + xlab('Short Term Trend (BS/day)')
-
-
-combined_plot <- plot_grid(pv, npv, bs, ncol = 2, labels = c("a)", "b)", "c)"))
-combined_plot
-
-
-
-
-# Checking if I take out outliers -----------------------------------------
-
-test['difference_pv'] <-  (test['pv_filter_slope'] - test['slope_rs_pv'])^2
-
-lower_bounds <- quantile(test[['difference_pv']], 0.25) - IQR(test[['difference_pv']])
-upper_bounds <- quantile(test[['difference_pv']], 0.75) + IQR(test[['difference_pv']])
-
-test_outlier_pv <- test %>%
-  subset( (difference_pv >= lower_bounds) &
-          (difference_pv <= upper_bounds))
-
-ggplot(data = test_outlier_pv, mapping = aes(y = pv_filter_slope, x = slope_rs_pv)) +
-  geom_point() + geom_smooth(method =  'lm') + theme_bw() + ggpmisc::stat_poly_eq(mapping = use_label(c("eq", "R2", 'p'))) +
-  geom_abline(color = 'red', lty = 2, size = 1) + coord_fixed(ratio=1, ylim = c(-0.1, 0.1), xlim = c(-0.1, 0.1))
-
-
-
-# For the appendix --------------------------------------------------------
-
-# Here, I want to look into the timings of site visits 
-evaluation_fc <- read.csv('../DATASETS/AusPlots_Extracted_Data/Final/DEA_FC_Ground_Truth_Evaluation.csv') %>%
-  mutate(time = as.Date(time)) %>%
-  arrange(time) 
-
-length(na.omit(evaluation_fc$green))
-length(na.omit(evaluation_fc$brown))
-length(na.omit(evaluation_fc$bare))
-
-counts.df <- as.data.frame(table(evaluation_fc$site_location_name)) %>% 
-  subset(Freq >= 2)  
-
-evaluation_fc_revisit <- subset(evaluation_fc, site_location_name %in% unique(counts.df$Var1))
-evaluation_fc_revisit$day_of_year <- yday(evaluation_fc_revisit$time)
-
-
-
-
-site_visit_sd <- aggregate(x = day_of_year ~ site_location_name,
-          data = evaluation_fc_revisit, FUN = sd, na.rm = F)
-
-
-pl_pv <- ggplot(data = site_visit_sd, 
-                mapping = aes(x = day_of_year)) +  
-  theme_bw() + 
-  labs(x = 'Day of Year of Visit (Standard Deviation)', y = 'count') +
-  geom_histogram(fill = '#3182BD', color = 'black', alpha = 0.9) +
-  theme(legend.position = "none") +
-  geom_vline(aes(xintercept = mean(day_of_year)), 
-             linetype = "dashed", size = 1, color = 'black') +
-  geom_vline(aes(xintercept = mean(day_of_year) + sd(day_of_year)), 
-             linetype = "dashed", size = 1, color = 'red') +
-  geom_vline(aes(xintercept = mean(day_of_year) - sd(day_of_year)), 
-             linetype = "dashed", size = 1, color = 'red') +
-  annotate('text', x = max(site_visit_sd$day_of_year) * 0.9, 
-           y = 30, 
-           label = paste0("x\u0305", ' = ',round(mean(site_visit_sd$day_of_year),4), 
-                          '\ns = ', round(sd(site_visit_sd$day_of_year),4)), 
-           color = "black", size = 3)
-
-
-# Try different method, from consectative visits
-
+# Combine all Plots -------------------------------------------------------
+final_combined_plot <- plot_grid(combined_plot_insitu,
+                                 combined_plot_DEA,
+                                 t, t2, cols =1,
+          labels = c(' ', ' ', 'g)', 'h)'))
+plot(final_combined_plot)
+ggsave(plot = final_combined_plot,
+       height = 18,
+       width = 16.5,
+       scale = 1.4,
+       filename = 'C:/Users/krish/Desktop/University/PAPER_1_STUFF/PAPER_1_REPOSITORY/FIGURES/Figure_9_Short_vs_Long_Term.png',
+       dpi = 600,
+       units = 'cm',
+       bg = "white")
+
+# END ---------------------------------------------------------------------
+# Supplementary Figure?  
 change <- read.csv('../DATASETS/AusPlots_Extracted_Data/Final/Fractional_Cover_Change_Evaluation.csv')
-
 change1 <- unique(change[, c('time_a', 'time_b', 'site_location_name')]) %>%
   mutate(time_a = as.Date(time_a),
          time_b = as.Date(time_b)) %>%
@@ -565,11 +382,7 @@ for (i in (change1$days_diff)){
     corrected_doy <- c(corrected_doy, i)
   }
 }
-
-
 change1$corrected_doy <- corrected_doy
-
-mean(corrected_doy >= 100)
 
 pl_pv <- ggplot(data = change1, 
                 mapping = aes(x = corrected_doy)) +  

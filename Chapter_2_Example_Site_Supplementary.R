@@ -86,24 +86,33 @@ revisited <- names(which(table(site_info$site_location_name) > 1))
 # NSABHC0012 --> Similar deal to above
 # NTAARP0004 --> Phenological Dates misaligned - slopes contradict 
 # NTAFIN0001
-
 example_site <- 'SAABHC0004'
 dea_fc_path <- '../DATASETS/DEA_FC_PROCESSED/MODELLED_PREPROCESSED/'
 dea_fc_path <- paste0(dea_fc_path, 'Input_DataSet_', example_site, '.csv')
 dea_fc <- read.csv(dea_fc_path)
 
+# Climate Data:
+clim_path <- paste0('../DATASETS/Climate_Gridded/Page_Variables/',
+                    example_site, '_page_1980_2022', '.csv')
+climate <- read.csv(clim_path) %>%
+  mutate(time = as.Date(time)) %>%
+  filter(time >= min(as.Date(dea_fc$time)) &
+           time <= max(as.Date(dea_fc$time)))
+
 # Read our evaluation dataset, which has the closest DEA FC timestamp to sites visited 
 evaluation.data.2 <- read.csv('../DATASETS/AusPlots_Extracted_Data/Final/DEA_FC_Ground_Truth_Evaluation_with_percentiles_.csv') %>%
   subset(site_location_name == example_site) %>%
+  mutate(time = as.Date(time)) %>%
   select(!other) %>%
-  na.omit()
+  na.omit() %>%
+  left_join(climate, by = 'time')
 
 theil_sen_reg <- read.csv('../DATASETS/AusPlots_Theil_Sen_Regression_Stats/AusPlots_Theil_Sen_Regression_Stats_Signf.csv')
 theil_sen_reg_subset <- subset(theil_sen_reg, site_location_name == example_site)
 
 
-## Since for the mean time I just want to show PV:
 
+## Since for the mean time I just want to show PV:
 
 og_model <- lm(formula = green~as.Date(time), data = evaluation.data.2)
 rs_model <- lm(formula = pv_filter~as.Date(time), data = evaluation.data.2)
@@ -193,23 +202,27 @@ t <- ggplot(data = dea_fc, aes(x = as.Date(time)))  +
   
 plot(t)
 
-rainfall <- ggplot(data = dea_fc, aes(x = as.Date(time))) +
-  geom_line(mapping = aes(y = precip_90), color = 'steelblue') + theme_bw() +
+rainfall <- ggplot(data = climate, aes(x = as.Date(time))) +
+  geom_line(mapping = aes(y = precip_730), color = 'steelblue') + theme_bw() +
   scale_x_date(date_labels = "%Y", minor_breaks = ('1 year'),
                date_breaks = ('5 years')) +
-  ylab('PPT (31-90 days, mm)') +
-  xlab('Time')
+  ylab('PPT (366-730 days, mm)') +
+  xlab('Time') +
+  geom_point(data = evaluation.data.2,
+             aes(x =  as.Date(time), 
+                 y = .data[['precip_730']])) +
+  geom_smooth(mapping = aes(y = precip_730))
 rainfall
 
-
+evaluation_set <- evaluation.data.2 
 number_of_visits <- nrow(evaluation_set)
 dea_fc <- fread(paste0("../DATASETS/DEA_FC_PROCESSED/MODELLED_PREPROCESSED/", 'Input_DataSet_', example_site, '.csv')) %>%
   mutate(time =  as.factor(time))
-evaluation_set <- evaluation.data.2 
+
 ecdf_green <- ggplot(data = dea_fc) +
   stat_ecdf(mapping = aes(x = pv_filter), color = 'darkgreen') +
   geom_point(data = evaluation_set,
-             mapping = aes(x = pv_filter, y = pv_filter_percentile, color = time),
+             mapping = aes(x = pv_filter, y = pv_filter_percentile, color = as.character(time)),
              size = 2)  + theme_bw() +
   ylab('PV Percentile') +
   xlab('PV (%)') +

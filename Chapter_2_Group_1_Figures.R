@@ -15,6 +15,9 @@ library(RColorBrewer)
 library(ggsignif)
 library(grDevices)
 library(latex2exp)
+library(rlang)
+library(magick)
+
 
 
 # Functions ----------------------------------------------------------------
@@ -104,81 +107,148 @@ for (i in c('pv_filter', 'npv_filter', 'bs_filter')) {
 # Maps --------------------------------------------------------------------
 
 sf_oz <- ozmap("states")
+annotate_properties <- list(x = 115,
+                         y = -10,
+                         size = 4)
 
 pl_pv <- ggplot(data = sf_oz) + geom_sf() +
   geom_point(data = theil_sen_reg_copy, 
-             mapping = aes(x = longitude, y = latitude, color = pv_filter_code),
-             size= 1.2, alpha = 0.7) + 
-  scale_colour_manual("Slope", values = c('1' = 'red', '2' = 'blue','3' = 'green'),
+             mapping = aes(x = longitude, 
+                           y = latitude, 
+                           fill = pv_filter_code),
+             size= 2,
+             alpha = 0.5,
+             shape = 21,
+             color = 'black', 
+             stroke = 0.3,
+             height = 0.3,
+             width = 0.3) + 
+  scale_fill_manual("Slope", values = c('1' = 'red', '2' = 'blue','3' = 'green'),
                       labels = c("Negative", "Non Significant", "Positive")) +
   theme_bw() +
   theme(
     legend.key = element_rect(fill = "white", color = "black"),  # Box around legend items
     legend.background = element_rect(fill = "white", color = "black")  # Box around the legend
   ) +
-  coord_sf(xlim = c(114, 152), ylim = c(-10, -43) )
+  coord_sf(xlim = c(114, 152), ylim = c(-10, -43) ) +
+  do.call(
+    annotate,
+    c(list("text", label = "a) PV", color = "black"),
+      annotate_properties)
+    )
+  
 pl_pv
 
 ## For NPV
 pl_npv <- ggplot(data = sf_oz) + geom_sf() +
   geom_point(data = theil_sen_reg_copy, 
-             mapping = aes(x = longitude, y = latitude, color = npv_filter_code),
-             size= 1.2, alpha = 0.7) + 
-  scale_colour_manual("Slope", values = c('1' = 'red', '2' = 'blue','3' = 'green'),
+             mapping = aes(x = longitude, y = latitude, fill = npv_filter_code),
+             size= 2.5, alpha = 0.5, shape = 21, color = 'black', stroke = 0.1) + 
+  scale_fill_manual("Slope", values = c('1' = 'red', '2' = 'blue','3' = 'green'),
                       labels = c("Negative", "Non Significant", "Positive")) +
   theme_bw() +
   theme(
     legend.key = element_rect(fill = "white", color = "black"),  # Box around legend items
     legend.background = element_rect(fill = "white", color = "black")  # Box around the legend
   ) +
-  coord_sf(xlim = c(114, 152), ylim = c(-10, -43) )
+  coord_sf(xlim = c(114, 152), ylim = c(-10, -43) ) +
+  do.call(
+    annotate,
+    c(list("text", label = "b) NPV", color = "black"),
+      annotate_properties)
+  )
 pl_npv
 
 ## For BS
 pl_bs <- ggplot(data = sf_oz) + geom_sf() +
   geom_point(data = theil_sen_reg_copy, 
-             mapping = aes(x = longitude, y = latitude, color = bs_filter_code),
-             size= 1.2, alpha = 0.6) +  
+             mapping = aes(x = longitude, y = latitude, fill = bs_filter_code),
+             size= 2.5, alpha = 0.5, shape = 21, color = 'black', stroke = 0.1) +  
   theme_bw() +
   theme(
     legend.key = element_rect(fill = "white", color = "black"),  # Box around legend items
     legend.background = element_rect(fill = "white", color = "black")  # Box around the legend
   ) +
-  scale_colour_manual("Slope", values = c('1' = 'red', '2' = 'blue','3' = 'green'),
+  scale_fill_manual("Trend", values = c('1' = 'red', '2' = 'blue','3' = 'green'),
                       labels = c("Negative", "Non Significant", "Positive")) + 
-  coord_sf(xlim = c(114, 152), ylim = c(-10, -43) )
+  coord_sf(xlim = c(114, 152), ylim = c(-10, -43) ) +
+  do.call(
+    annotate,
+    c(list("text", label = "c) BS", color = "black"),
+      annotate_properties)
+  ) +
+  theme(
+    legend.key = element_rect(fill = "white", color = "black"),  # Box around legend items
+    legend.background = element_rect(fill = "white", color = "black"),  # Box around the legend
+  )
 pl_bs
+
+legend <- cowplot::get_legend(pl_bs)
 
 # Set up the plots for a gridded plot 
 p1 <- pl_pv + theme(legend.position = "none",
-                    axis.text.x = element_text(angle = 45, hjust = 1))
+                    axis.text.x = element_text(angle = 45, hjust = 1)) +
+  xlab('')
 p2 <- pl_npv + theme(legend.position = "none",
-                     axis.text.x = element_text(angle = 45, hjust = 1))
+                     axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ylab('') 
 p3 <- pl_bs + theme(axis.text.x = element_text(angle = 45, hjust = 1),
                     legend.position = "none")
 
-combined_plot <- plot_grid(p1, p2, p3, ncol = 2, labels = c("a)", "b)", "c)"))
-combined_plot
 
-title <- ggdraw() + 
-  draw_label('1987-2023', fontface = 'bold', size = 14, hjust = 0.5)
-final_plot <- plot_grid(title, combined_plot, ncol = 1, rel_heights = c(0.1, 1))
-final_plot
-
-# Figure just for the TERN SYMPOSIUM
-
-combined_plot <- plot_grid(p1, p2, p3, ncol = 1, labels = c("a)", "b)", "c)"))
+combined_plot <- plot_grid(p1, p2, p3, ncol = 2)
 combined_plot
 
 
+ggsave("C:/Users/krish/Desktop/PAPER_1_REPOSITORY/FIGURES/Figure_2_Thiel_Sen_Regression_Maps.png",
+       plot = combined_plot,
+       width = 30,
+       height = 30,
+       units = "cm",
+       bg = 'white',
+       dpi = 600)
+
+ggsave("legend.pdf",
+       plot_grid(legend), 
+       width = 2,
+       height = 2, 
+       dpi = 600)
 
 
-# Histograms for Overall fractional cover 
+# Composite the Legend image with the plot image
+plot_img <- image_read("C:/Users/krish/Desktop/PAPER_1_REPOSITORY/FIGURES/Figure_2_Thiel_Sen_Regression_Maps.png")
+legend_img <- image_read("legend.png")
+legend_img <- image_scale(legend_img, "x1200") 
+
+final_img <- image_composite(
+  plot_img,
+  legend_img,
+  offset = "+3900+3400",  
+  operator = "atop"    
+)
+
+# Ready to write 
+image_write(final_img,
+            "C:/Users/krish/Desktop/PAPER_1_REPOSITORY/FIGURES/Figure_2_Thiel_Sen_Regression_Maps.png", 
+            format = 'png',
+            flatten = T
+            )
+
+# FOR TERN SYMPOSIUM
+
+combined_plot <- plot_grid(p1 + ylab(''),
+                           p2 + xlab(''), 
+                           p3 + xlab('') +
+                             ylab(''),
+                           ncol = 3)
+combined_plot
+
+# Histograms for Overall fractional Cover ---------------------------------
 
 pl_pv <- ggplot(data = theil_sen_reg_copy, 
                 mapping = aes(x = pv_filter_slope_yr)) +  
   theme_bw() + 
-  labs(x = 'PV/yr', y = 'count') +
+  labs(x = '%PV/yr', y = 'count') +
   geom_histogram(fill = '#3182BD', color = 'black', alpha = 0.9, bins = 40) +
   #scale_y_continuous(breaks = seq(-0.8, 0.8, 0.2), limits = c(-0.8, 0.9)) +
   theme(legend.position = "none") +
@@ -201,7 +271,7 @@ pl_pv
 pl_npv <- ggplot(data = theil_sen_reg_copy, 
                  mapping = aes(x = npv_filter_slope_yr)) +  
   theme_bw() + 
-  labs(x = 'NPV/yr', y = 'count') +
+  labs(x = '%NPV/yr', y = 'count') +
   geom_histogram(fill = '#3182BD', color = 'black', alpha = 0.9) +
   #scale_y_continuous(breaks = seq(-0.8, 0.8, 0.2), limits = c(-0.8, 0.9)) +
   theme(legend.position = "none") +
@@ -224,7 +294,7 @@ pl_npv
 pl_bs <- ggplot(data = theil_sen_reg_copy, 
                 mapping = aes(x = bs_filter_slope_yr)) +  
   theme_bw() + 
-  labs(x = 'BS/yr', y = 'count') +
+  labs(x = '%BS/yr', y = 'count') +
   geom_histogram(fill = '#3182BD', color = 'black', alpha = 0.9) +
   #scale_y_continuous(breaks = seq(-0.8, 0.8, 0.2), limits = c(-0.8, 0.9)) +
   theme(legend.position = "none") +
@@ -245,6 +315,15 @@ pl_bs
 
 combined_plot <- plot_grid(pl_pv, pl_npv, pl_bs, ncol = 2, labels = c("a)", "b)", "c)"))
 combined_plot
+
+ggsave(combined_plot, 
+       height = 10.32,
+       width = 14.53,
+       units = 'cm',
+       filename = 'C:/Users/krish/Desktop/University/PAPER_1_STUFF/PAPER_1_REPOSITORY/FIGURES/Figure_SI_BlueHisto.png',
+       dpi = 600,
+       scale = 1.4,
+       bg = 'white')
 
 title <- ggdraw() + 
   draw_label('1987-2000', fontface = 'bold', size = 14, hjust = 0.5)
@@ -334,13 +413,13 @@ pv_mean_str <- generate_mean_string(theil_sen_reg_copy, 'veg', 'pv')
 pl_pv <- ggplot(data = theil_sen_reg_copy, 
                 mapping = aes(y = pv_filter_slope_yr, x =vegetation_type)) +  
   theme_bw() + 
-  geom_jitter(position = position_jitter(seed = 1, width = 0.15), 
-              alpha = 0.7, 
+  geom_jitter(position = position_jitter(seed = 1, width = 0.15, height = 0), 
+              alpha = 0.5, 
               size = 1.5,
-              color = 'forestgreen', 
-              pch = 1) +
+              fill = 'gold', 
+              pch = 21) +
   geom_violin(alpha = 0.3) +
-  labs(y = 'PV/yr', x = 'Vegetation Type') +
+  labs(y = '%PV/yr', x = 'Vegetation Type') +
   geom_boxplot(width = 0.25, alpha = 0) +
   scale_y_continuous(breaks = seq(-0.8, 1.2, 0.2), limits = c(-0.8, 1.2)) +
   theme(legend.position = "none") +
@@ -353,8 +432,12 @@ pl_pv <- ggplot(data = theil_sen_reg_copy,
              color = "red") 
 
 for (i in 1:length(pv_mean_str)) {
-  pl_pv <- pl_pv + annotate("text", x = i + .1, y = 1.1 , label = pv_mean_str[i],
-                            hjust = 1, size = 4) 
+  pl_pv <- pl_pv + annotate("text",
+                            x = i + .2,
+                            y = 1.1 ,
+                            label = pv_mean_str[[i]],
+                            hjust = 1,
+                            size = 4) 
 }
   
 pl_pv
@@ -365,13 +448,13 @@ npv_mean_str <- generate_mean_string(theil_sen_reg_copy, 'veg', 'npv')
 pl_npv <- ggplot(data = theil_sen_reg_copy, 
                  mapping = aes(y = npv_filter_slope_yr, x =vegetation_type)) +  
   theme_bw() + 
-  geom_jitter(position = position_jitter(seed = 1, width = 0.15), 
-              alpha = 0.7, 
-              size = 1.5, 
-              color = 'forestgreen',
-              pch = 1) +
+  geom_jitter(position = position_jitter(seed = 1, width = 0.15, height = 0), 
+              alpha = 0.5, 
+              size = 1.5,
+              fill = 'gold', 
+              pch = 21) +
   geom_violin(alpha = 0.3) +
-  labs(y = 'NPV/yr', x = 'Vegetation Type') +
+  labs(y = '%NPV/yr', x = 'Vegetation Type') +
   geom_boxplot(width = 0.25, alpha = 0) +
   scale_y_continuous(breaks = seq(-0.8, 1.2, 0.2), limits = c(-0.8, 1.2)) +
   theme(legend.position = "none") +
@@ -384,7 +467,7 @@ pl_npv <- ggplot(data = theil_sen_reg_copy,
              color = "red") 
 
 for (i in 1:length(npv_mean_str)) {
-  pl_npv <- pl_npv + annotate("text", x = i + .1, y = 1.1 , label = npv_mean_str[i],
+  pl_npv <- pl_npv + annotate("text", x = i + .2, y = 1.1 , label = npv_mean_str[i],
                             hjust = 1, size = 4) 
 }
 
@@ -395,13 +478,13 @@ bs_mean_str <- generate_mean_string(theil_sen_reg_copy, 'veg', 'bs')
 pl_bs <- ggplot(data = theil_sen_reg_copy, 
                 mapping = aes(y = bs_filter_slope_yr, x =vegetation_type)) +  
   theme_bw() + 
-  geom_jitter(position = position_jitter(seed = 1, width = 0.15),
-              alpha = 0.7, 
-              size = 1.5, 
-              color = 'forestgreen',
-              pch = 1) +
+  geom_jitter(position = position_jitter(seed = 1, width = 0.15, height = 0),
+              alpha = 0.5, 
+              size = 1.5,
+              fill = 'gold', 
+              pch = 21) +
   geom_violin(alpha = 0.3) +
-  labs(y = 'BS/yr', x = 'Vegetation Type') +
+  labs(y = '%BS/yr', x = 'Vegetation Type') +
   geom_boxplot(width = 0.25, alpha = 0) +
   scale_y_continuous(breaks = seq(-0.8, 1.2, 0.2), limits = c(-0.8, 1.2)) +
   theme(legend.position = "none") +
@@ -414,18 +497,198 @@ pl_bs <- ggplot(data = theil_sen_reg_copy,
              color = "red")
 
 for (i in 1:length(npv_mean_str)) {
-  pl_bs <- pl_bs + annotate("text", x = i + .1, y = 1.1 , label = bs_mean_str[i],
+  pl_bs <- pl_bs + annotate("text", x = i + .2, y = 1.1 , label = bs_mean_str[i],
                               hjust = 1, size = 4) 
 }
 
-
-
-
 combined_plot <- plot_grid(pl_pv, pl_npv, pl_bs, ncol = 2, labels = c("a)", "b)", "c)"))
 combined_plot
-ggsave(combined_plot)
+ggsave(combined_plot, 
+       height = 15.28,
+       width = 17.2,
+       units = 'cm',
+       filename = 'C:/Users/krish/Desktop/University/PAPER_1_STUFF/PAPER_1_REPOSITORY/FIGURES/Figure_4_Boxplots.png',
+       dpi = 600,
+       scale = 1.5,
+       bg = 'white')
+
+# For TERN ----------------------------------------------------------------
+
+generate_mean_string <- function(d, group, slope) {
+  
+  if (slope == 'pv') {
+    slope_name = 'pv_filter_slope_yr'
+  } else if (slope == 'npv') {
+    slope_name = 'npv_filter_slope_yr'
+  } else if (slope == 'bs') {
+    slope_name = 'bs_filter_slope_yr'
+  }
+  
+  if (group == 'veg') {
+    group_name = 'vegetation_type'
+  } else if (group == 'bioclimatic') {
+    group_name = 'bioclimatic_region'
+  }
+  
+  agg <- aggregate(x = theil_sen_reg_copy[[slope_name]],
+                   by = list(theil_sen_reg_copy[[group_name]]),
+                   FUN = mean)
+  
+  
+  mean_str <- c()
+  if (group_name == 'bioclimatic_region') {
+    abrev <- substr(group_name, start = 1, stop = 3) # Abbreviate
+    for (i in 1:nrow(agg)) {
+      mean_str <- c(mean_str, paste0('x\u0305(', abrev, i, ') = ' ,
+                                     round(agg[i, 'x'], 3)))
+      
+      #print(mean_str)
+    }
+  } else if (group_name == 'vegetation_type') {
+    print('VEG')
+    
+    p_values <- sapply(
+      split(theil_sen_reg_copy,
+            theil_sen_reg_copy$vegetation_type),
+      function(x) {
+        return (t.test(x[slope_name])$p.value)
+      }
+    ) %>% as.data.frame()
+    
+    p_values$Group.1 = rownames(p_values)
+    
+    agg <- agg %>% left_join(p_values)
+    print(agg)
+    
+    # Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+    
+    for (i in 1:nrow(agg)) {
+      
+      if (agg[[i, '.']] < 0.001) {
+        signf.code <- '***'
+      } else if(agg[[i, '.']] < 0.01) {
+        signf.code <- '**'
+      } else if(agg[[i, '.']] < 0.05) {
+        signf.code <- '*'
+      } else if(agg[[i, '.']] < 0.1) {
+        signf.code <- '.'
+      } else {
+        signf.code <- ' '
+      }
+      
+      mean_str <- c(
+        mean_str, 
+        paste0('x\u0305 = ' ,round(agg[i, 'x'], 3),signf.code)
+      )
+      #print(mean_str)
+    }
+  }
+  
+  return(mean_str)
+}
 
 
+pv_mean_str <- generate_mean_string(theil_sen_reg_copy, 'veg', 'pv')
+pl_pv <- ggplot(data = theil_sen_reg_copy, 
+                mapping = aes(y = pv_filter_slope_yr, x =vegetation_type)) +  
+  theme_bw() + 
+  geom_jitter(position = position_jitter(seed = 1, width = 0.15), 
+              alpha = 0.5, 
+              size = 1.5,
+              fill = 'gold', 
+              pch = 21) +
+  geom_violin(alpha = 0.3) +
+  labs(y = 'PV/yr', x = 'Vegetation Type', title = 'Photosynthetic Vegetation') +
+  geom_boxplot(width = 0.25, alpha = 0) +
+  scale_y_continuous(breaks = seq(-0.8, 1.2, 0.2), limits = c(-0.8, 1.2)) +
+  theme(legend.position = "none") +
+  annotate("text", x = 1, y = 1, label = "a",size = 5) +
+  annotate("text", x = 2, y = 1, label = "a",size = 5) +
+  annotate("text", x = 3, y = 1, label = "a",size = 5) +
+  stat_summary(fun = mean, geom = "point", shape = 21, 
+               size = 1, fill = "red") +
+  geom_hline(yintercept=0, linetype="dashed", 
+             color = "red") 
+
+for (i in 1:length(pv_mean_str)) {
+  pl_pv <- pl_pv + annotate("text",
+                            x = i + .4,
+                            y = 1.1 ,
+                            label = pv_mean_str[[i]],
+                            hjust = 1,
+                            size = 5) 
+}
+
+pl_pv
+
+npv_mean_str <- generate_mean_string(theil_sen_reg_copy, 'veg', 'npv')
+pl_npv <- ggplot(data = theil_sen_reg_copy, 
+                 mapping = aes(y = npv_filter_slope_yr, x =vegetation_type)) +  
+  theme_bw() + 
+  geom_jitter(position = position_jitter(seed = 1, width = 0.15), 
+              alpha = 0.5, 
+              size = 1.5,
+              fill = 'gold', 
+              pch = 21) +
+  geom_violin(alpha = 0.3) +
+  labs(y = 'NPV/yr', x = 'Vegetation Type', title = 'Non-photosynthetic Vegetation') +
+  geom_boxplot(width = 0.25, alpha = 0) +
+  scale_y_continuous(breaks = seq(-0.8, 1.2, 0.2), limits = c(-0.8, 1.2)) +
+  theme(legend.position = "none") +
+  annotate("text", x = 1, y = 1, label = "a",size = 5) +
+  annotate("text", x = 2, y = 1, label = "b",size = 5) +
+  annotate("text", x = 3, y = 1, label = "b",size = 5)  +
+  stat_summary(fun = mean, geom = "point", shape = 21, 
+               size = 1, fill = "red") +
+  geom_hline(yintercept=0, linetype="dashed", 
+             color = "red") 
+
+for (i in 1:length(npv_mean_str)) {
+  pl_npv <- pl_npv + annotate("text", x = i + .4, y = 1.1 , label = npv_mean_str[i],
+                              hjust = 1, size = 5) 
+}
+
+pl_npv
+
+bs_mean_str <- generate_mean_string(theil_sen_reg_copy, 'veg', 'bs')
+pl_bs <- ggplot(data = theil_sen_reg_copy, 
+                mapping = aes(y = bs_filter_slope_yr, x =vegetation_type)) +  
+  theme_bw() + 
+  geom_jitter(position = position_jitter(seed = 1, width = 0.15),
+              alpha = 0.5, 
+              size = 1.5,
+              fill = 'gold', 
+              pch = 21) +
+  geom_violin(alpha = 0.3) +
+  labs(y = 'BS/yr', x = 'Vegetation Type', title = 'Bare Soil') +
+  geom_boxplot(width = 0.25, alpha = 0) +
+  scale_y_continuous(breaks = seq(-0.8, 1.2, 0.2), limits = c(-0.8, 1.2)) +
+  theme(legend.position = "none") +
+  annotate("text", x = 1, y = 1, label = "a",size = 5) +
+  annotate("text", x = 2, y = 1, label = "ab",size = 5) +
+  annotate("text", x = 3, y = 1, label = "b",size = 5) +
+  stat_summary(fun = mean, geom = "point", shape = 21, 
+               size = 1, fill = "red") +
+  geom_hline(yintercept=0, linetype="dashed", 
+             color = "red")
+
+for (i in 1:length(npv_mean_str)) {
+  pl_bs <- pl_bs + annotate("text", x = i + .4, y = 1.1 , label = bs_mean_str[i],
+                            hjust = 1, size = 5) 
+}
+
+
+combined_plot <- plot_grid(pl_pv, pl_npv, pl_bs, ncol = 3)
+combined_plot
+
+ggsave(combined_plot, 
+       height = 15.00,
+       width = 33.87,
+       units = 'cm',
+       filename = 'C:/Users/krish/Desktop/PAPER_1_REPOSITORY/FIGURES/TERN_Figure_4_Boxplots.png',
+       dpi = 600,
+       scale = 1.2,
+       bg = 'white')
 
 # Box Plots for Bioclimatic Regions ---------------------------------------
 

@@ -27,30 +27,22 @@ classify <- function(dataset.row) {
 
 # 16-04-25 ----------------------------------------------------------------
 # Testing the change in dominance 
-
-site_info <- readRDS('../DATASETS/AusPlots_Extracted_Data/Final/site_veg_Final2-0-6.rds')
-site_date <- site_info$site.info %>%
-  select(site_unique, visit_date) 
-  
-
+one_point <- read.csv('../DATASETS/AusPlots_Extracted_Data/Final/DEA_FC_Ground_Truth_Evaluation_complete_Height_Rule_Agg.csv') 
 growth.form <- read.csv('../DATASETS/AusPlots_Extracted_Data/Final/AusPlots_VegType_PC_Height_Rule.csv')
 
 # Give row sum based on the groupings 
 growth.form$vegetation_type <- unlist(apply(growth.form, MARGIN = 1, FUN = classify))
 growth.form$site_location_name <- unlist(lapply(growth.form$site_unique, FUN = get_location_name))
-
 growth.form.reduced <- growth.form %>%
-  select(site_unique, site_location_name, Grass, Shrub, Tree, vegetation_type)
+  select(site_unique, site_location_name, Grass, Shrub, Tree, vegetation_type) %>%
+  subset(site_location_name %in% unique(one_point$site_location_name))
 
 # Now we want to only extract sites with multiple visits 
-
 site_repeat_names <- names(which(table(growth.form.reduced$site_location_name) > 1))
-
 site_change <- growth.form.reduced %>%
   subset(site_location_name %in% site_repeat_names)
 
 # Now check which sites have actually changed dominance 
-
 sites <- unique(site_change$site_location_name)
 changed_sites <- c()
 for(s in sites) {
@@ -60,6 +52,7 @@ for(s in sites) {
     changed_sites <- c(changed_sites, s)
   }
 }
+print(length(changed_sites)) # number of sites that changed dominance
 
 #  SAABHC0004
 
@@ -72,7 +65,12 @@ site_change_long <- site_change %>%
   rename(vegetation_type = name,
          visit = value)
   
-  
+
+site_info <- readRDS('../DATASETS/AusPlots_Extracted_Data/Final/site_veg_Final2-0-6.rds')
+site_date <- site_info$site.info %>%
+  select(site_unique, site_location_name, visit_date) %>%
+  subset(site_location_name %in% unique(one_point$site_location_name))
+
 
 # Now I will reformat the dataset that is required for the plot 
 sites_list <- list()
