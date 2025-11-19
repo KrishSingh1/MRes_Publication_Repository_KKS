@@ -378,7 +378,7 @@ plt_trends <- ggplot(data = site_change_combined,
   geom_hline(yintercept=0, linetype="dashed", 
              color = "red")
 
-ggsave(filename = 'Supplementary_Information/pc_per_visit__trends_box_plt.png',
+ggsave(filename = 'Supplementary_Information/pc_per_visit_trends_box_plt.png',
        plot = plt_trends,
        dpi = 300)
 
