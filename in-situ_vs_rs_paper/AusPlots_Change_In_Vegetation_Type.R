@@ -128,7 +128,7 @@ classify_all_visit <- function(dataset.row) {
 one_point <- read.csv('DATASETS/DEA_FC_Ground_Truth_Evaluation_complete_Height_Rule_Agg.csv') # The evaluation data, detailing what data we have DEA and on-ground FC
 growth.form <- read.csv('DATASETS/AusPlots_VegType_PC_Height_Rule.csv') # Every site collected and their PC of growth form 
 site_visits <- unique(one_point[,c('site_unique', 'visit_start_date')]) # Get unique number of visits from the evaluation data 
-site_info <- readRDS('DATASETS/site_veg_Final2-0-6.rds') # FC data 
+site_info <- readRDS('DATASETS/site_veg_Final2-0-6.rds') # PI data 
 
 # Site Veg Dominance classification ---------------------------------------
 growth.form$vegetation_type <- unlist(apply(growth.form, MARGIN = 1, FUN = classify)) # Classify dominant veg type 

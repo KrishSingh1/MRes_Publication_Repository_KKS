@@ -1,5 +1,5 @@
 #### Generate Map of AusPlots Sites ####
-## KRISH sINGH
+## Krish Singh
 ## 22-11-2024
 
 

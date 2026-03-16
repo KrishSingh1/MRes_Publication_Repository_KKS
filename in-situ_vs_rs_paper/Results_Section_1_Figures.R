@@ -1,5 +1,5 @@
 #### Chapter 2 Group 1 Figures ####
-## KRISH sINGH
+## Krish Karan Singh
 ## 26-04-2024
 
 

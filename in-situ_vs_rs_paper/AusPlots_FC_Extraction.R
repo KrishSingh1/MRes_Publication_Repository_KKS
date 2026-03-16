@@ -8,7 +8,6 @@
 
 library(ausplotsR) # 2.0.6
 
-
 # Functions ---------------------------------------------------------------
 
 create_error_fc_data <- function(site.info, error){
@@ -81,13 +80,5 @@ site.names <- unique(sites$site.info.site_location_name)
 fcs <- get_individual_fcs(site.names)
 
 write.csv(fcs,'../DATASETS/AusPlots_Extracted_Data/Final/AusPlots_FC_Iter_2_0_6.csv')
-
-# Test --------------------------------------------------------------------
-
-sites.sub <- read.csv("../DATASETS/Sites_Subset_20231010/ausplots_site_info/sites_subset.csv")
-site.names.sub <- unique(sites.sub$site_location_name)
-fcs.sub <- get_individual_fcs(site.names.sub)
-
-write.csv(fcs.sub,'../DATASETS/AusPlots_Sub_FC_Iter_2_0_6.csv')
 
 
