@@ -55,6 +55,16 @@ Contains code used to spatially trim the dimensions of the extracted DEA FC data
 Datasets produced:
 - `All spatially trimmed site-level DEA FC data in 'DATASETS/DEA_FC_PROCESSED/SPATIAL_AND_UE_FILTER`
 
+**PreprocessData.py**
+This code contains different transformer functions used to apply the Savitzy-Golay Filter on DEA FC data.
+
+**Preprocesser.py**
+This code applies the functions in *PreprocessData.py* to iteratively apply the Savitzy-Golay Filter on all DEA FC data. Datasets used:
+- *All csv file data from '/DATASETS/DEA_FC_PROCESSED/SPATIAL_AND_UE_FILTER'*
+
+Datasets produced:
+- *All data in 'DATASETS/DEA_FC_PROCESSED/MODELLED_PREPROCESSED'*
+
 **DEA_Evaluation_Nearest_Point.R:**
 Contains code used to compare AusPlots and DEA FC (closest timestamp) for each site visits. It uses datasets:
 - *All DEA FC data from: 'DATASETS/DEA_FC_PROCESSED/MODELLED_PREPROCESSED/'*
