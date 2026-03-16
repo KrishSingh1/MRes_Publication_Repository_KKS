@@ -34,6 +34,7 @@ Krause, C., Dunn, B., Bishop-Taylor, R., Adams, C., Burton, C., Alger, M., Chua,
 **AusPlots_Extract_CornerPoints.R:**
 Contains code used to clean coordinate data of the AusPlots sites. If there are missing coordinate points, then they are estimated based on the site's dimensions and their SW point. Datasets used:
 - *Published Plot Corners_extract26062024.csv*
+  
 Dataset Produced:
 - `Published Plot Corners_extract26062024_cleaned.csv`
 
@@ -41,6 +42,7 @@ Dataset Produced:
 Contains code used to classify AusPlots sites by the dominance in growth form percent cover. It uses datasets:
 - *site_veg_Final2-0-6.rds*
 - *Growth_Type_Classification.csv*
+  
 The datsets produced from this code includes:
 - *AusPlots_VegType_PC_Height_Rule.csv*
 - *AusPlots_Agg_VegType_PC_Height_Rule.csv*
@@ -57,6 +59,7 @@ Contains code used to compare AusPlots and DEA FC (closest timestamp) for each s
 - *All DEA FC data from: 'DATASETS/DEA_FC_PROCESSED/MODELLED_PREPROCESSED/'*
 -*'AusPlots_FC_Iter_2_0_6.csv'*
 -*'extracted_Final_site_info_2-0-6.csv'*
+
 Datasets produced:
 - `DEA_FC_Ground_Truth_Evaluation.csv`
 - `AusPlots_VegType_PC_Height_Rule.csv`
@@ -65,6 +68,7 @@ Datasets produced:
 **DEA_Data_Repeated_Sites_Change.R:**
 Contained code used to calculate the change in FC between site visits from AusPlots and DEA's FC data (closest timestamp), producing a dataset that allows for comparison between the changes. It used datasets:
 - *AusPlots_Agg_VegType_PC_Height_Rule.csv*
+  
 Datasets produced:
 - `Fractional_Cover_Change_Evaluation.csv`
 
@@ -72,6 +76,7 @@ Datasets produced:
 Contains code used to perform thiel-sen regression analysis on each site's DEA-FC timeseries. Datasets used:
 - *All datasets in 'DATASETS/DEA_FC_PROCESSED/MODELLED_PREPROCESSED/'*
 - *extracted_Final_site_info_2-0-6.csv*
+  
 The dataset produced from this code includes:
 - `AusPlots_Theil_Sen_Regression_Stats_Signf.csv`
 
