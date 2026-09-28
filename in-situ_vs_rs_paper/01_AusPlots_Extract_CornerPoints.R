@@ -27,24 +27,24 @@ site.corners.data.cleaned$missing <- rep('FALSE', nrow(site.corners.data.cleaned
 site.corners.data.cleaned <-site.corners.data.cleaned[-which(
   site.corners.data.cleaned$site_location_name == 'WAAPIL0019' &  site.corners.data.cleaned$point == 'SE'),]
 
+# Join the missing site AusPlots data to the dataset - we will estimate the boundaries via SW and dimnensions 
 missing.sites <- setdiff(file.names, site.corners.data.cleaned$site_location_name)
 missing.sites.data <- get_ausplots(missing.sites)
 missing.sites.data <- missing.sites.data$site.info[,c('site_location_name', 'point', 'longitude', 'latitude')]
 missing.sites.data$missing <- rep('True', nrow(missing.sites.data))
 missing.sites.data <- unique(missing.sites.data)
 
-
-site.corners.data.cleaned <- site.corners.data.cleaned %>%
+site.corners.data.cleaned <- site.corners.data.cleaned %>% 
+  bind_rows(missing.sites.data) %>% # Bind to the missing data points
   st_as_sf(coords = c('longitude', 'latitude')) %>%
   st_set_crs(4326) %>% # Set crs to the original crs
   st_transform(3577, allow_ballpark = F ) # Convert to 3577, same as the DEA FC default
 site.corners.data.cleaned$estimation_2 <- rep('False', nrow(site.corners.data.cleaned))
 site.corners.data.cleaned$point <- toupper(site.corners.data.cleaned$point)
 
-
 # # Subset the data to only include 'SW', 'SE', 'NE', and 'NW'
 unique_points <- site.corners.data.cleaned %>%
-  subset(subset = (point == 'SW' | point ==  'SE'  | point == 'NE' | point == 'NW') )
+  subset(subset = (point == 'SW' | point ==  'SE' | point == 'NE' | point == 'NW') )
 
 # # Check for sites with missing corner points
 result <- unique_points %>%
