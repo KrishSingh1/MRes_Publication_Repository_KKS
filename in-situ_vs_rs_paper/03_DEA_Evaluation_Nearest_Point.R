@@ -91,7 +91,7 @@ AusPlots_fc <- AusPlots_fc %>% mutate(time = as.Date(time))
 write.csv(AusPlots_fc, 'DATASETS/DEA_FC_Ground_Truth_Evaluation.csv')
 
 # Group by vegetation and growth form
-AusPlots_fc <- read.csv('DATASETS/AusPlots_Extracted_Data/Final/DEA_FC_Ground_Truth_Evaluation.csv') %>%
+AusPlots_fc <- read.csv('DATASETS/DEA_FC_Ground_Truth_Evaluation.csv') %>%
   dplyr::select(!X)
 
 remote_long <- AusPlots_fc %>%
@@ -111,15 +111,16 @@ obs_long <- AusPlots_fc %>%
                names_to = "fraction_type",
                values_to = "on_ground_value")
 
+## Here we are creating either one dataset, where we allocate dominant vegetation type inidividually visit or by an average
 is_agg <- TRUE
 if(!is_agg) {
   print('Allocating vegetation type per visit')
-  veg.type.agg <- read.csv('DATASETS/AusPlots_Extracted_Data/Final/AusPlots_VegType_PC_Height_Rule.csv') %>%
+  veg.type.agg <- read.csv('DATASETS/AusPlots_VegType_PC_Height_Rule.csv') %>%
   dplyr::select(c("site_unique", "vegetation_type"))
   file_name <- 'DEA_FC_Ground_Truth_Evaluation_complete_Height_Rule.csv'
 } else {
   print('Allocating vegetation type based on avg. visit')
-  veg.type.agg <- read.csv('DATASETS/AusPlots_Extracted_Data/Final/AusPlots_Agg_VegType_PC_Height_Rule.csv') %>%
+  veg.type.agg <- read.csv('DATASETS/AusPlots_Agg_VegType_PC_Height_Rule.csv') %>%
     dplyr::select(c("site_location_name", "vegetation_type"))
   file_name <- 'DEA_FC_Ground_Truth_Evaluation_complete_Height_Rule_Agg.csv'
 }
@@ -134,4 +135,4 @@ combined <- remote_long %>%
   filter(!is.na(on_ground_value))
   
 
-write.csv(combined, paste0('../DATASETS/AusPlots_Extracted_Data/', file_name))
+write.csv(combined, paste0('DATASETS/', file_name))

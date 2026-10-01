@@ -27,10 +27,8 @@ library(tidyr)
 
 # Main --------------------------------------------------------------------
 
-sites.query <- read.csv("../DATASETS/sites_info_query.csv")
-
 # Load AusPlots data 
-evaluation_fc <- fread('../DATASETS/AusPlots_Extracted_Data/Final/DEA_FC_Ground_Truth_Evaluation.csv') %>%
+evaluation_fc <- fread('DATASETS/DEA_FC_Ground_Truth_Evaluation.csv') %>%
   mutate(time = as.Date(time)) %>%
   arrange(time)
   
@@ -111,7 +109,7 @@ obs_long <- change_list$green_fc %>%
                values_to = "on_ground_value")
   
 
-veg.type.agg <- read.csv('../DATASETS/AusPlots_Extracted_Data/Final/AusPlots_Agg_VegType_PC_Height_Rule.csv') %>%
+veg.type.agg <- read.csv('DATASETS/AusPlots_Agg_VegType_PC_Height_Rule.csv') %>%
   select(c("site_location_name", "vegetation_type"))
   
 combined <- remote_long %>% 
@@ -121,4 +119,4 @@ combined <- remote_long %>%
   left_join(veg.type.agg) 
 
 
-write.csv(combined, '../DATASETS/AusPlots_Extracted_Data/Final/Fractional_Cover_Change_Evaluation.csv')
+write.csv(combined, 'DATASETS/Fractional_Cover_Change_Evaluation.csv')

@@ -165,10 +165,6 @@ class preprocess_fc_time_series(BaseEstimator, TransformerMixin):
             variable_name = f + '_filter'
             X[variable_name] = savgol_filter(X[f], window_length = self.window_length, polyorder = self.polyorder)
             X.loc[X[variable_name] < 0, variable_name] = 0 # correct for any negative-valued fractions 
-        
-        # Note: I am removing records that go above 2023 because climate data only goes so far 
-        # Also prevents the inclusion of 2023 into the calculation of MAP, MAT when there is no data 
-        X = X[X.index < '01-01-2023']
         return X
     
 
