@@ -103,8 +103,6 @@ site.corners.data.cleaned <- site.corners.data.cleaned %>%
   st_as_sf(coords = c('x', 'y')) %>%
   st_set_crs(3577) # Set crs to the original crs
 
-plot(st_geometry(site.corners.data.cleaned)) # Plot to check if this roughly makes an Australian shape
-
 error.messages <- c('')
 counter_max <- length(file.names)
 counter_current <- 1
@@ -115,13 +113,28 @@ for (query in file.names) {
   # Get the progress bar
   site.fc <- get_preprocessed_dea_fc(query, site.corners.data = site.corners.data.cleaned, 
                                      directory = directory, plot_spatial_extent = F)
-  write.csv(site.fc, paste0('DATASETS/DEA_FC_PROCESSED/SPATIAL_AND_UE_FILTER/', query, '.csv')) 
+  
+  if(nrow(site.fc) <= 200) {
+    print(paste0('Skip write file of site: ', query,' as there are too few points; something is causing the omission of so many points, likely data quality issues'))
+    counter_current <- counter_current + 1
+    next
+  }
+  
+  fwrite(site.fc, paste0('DATASETS/DEA_FC_PROCESSED/SPATIAL_AND_UE_FILTER/', query, '.csv')) 
   
   counter_current <- counter_current + 1
   setTxtProgressBar(pb,counter_current,label = query)
   
 }
-writeLines(error.messages, 'DATASETS/DEA_FC_PROCESSED/SPATIAL_AND_UE_FILTER/log.txt')
 close(pb)
 
+
+# Sanity Checks ---------------------------------------------------------------------------------------------------
+
+
+plot(st_geometry(site.corners.data.cleaned)) # Plot to check if this roughly makes an Australian shap
+
+query <- 'SATFLB0007'
+site.fc <- get_preprocessed_dea_fc(query, site.corners.data = site.corners.data.cleaned, 
+                                   directory = directory, plot_spatial_extent = T)
 

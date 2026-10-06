@@ -70,7 +70,7 @@ classify <- function(dataset.row) {
 # Main --------------------------------------------------------------------
 
 # Load PI Data 
-site_veg <- readRDS('../DATASETS/AusPlots_Extracted_Data/Final/site_veg_Final2-0-6.rds')
+site_veg <- readRDS('DATASETS/site_veg_Final2-0-6.rds')
 PI <- site_veg$veg.PI
 site_name_example <- 'NTAARP0004'
 
@@ -79,13 +79,68 @@ PI_growth_forms_names <- sort(unique(PI$growth_form))
 PI_growth_forms_names <- PI_growth_forms_names[which(PI_growth_forms_names != 'NC')]
 
 # Load classification scheme
-growth.form.classification <- read.csv("../DATASETS/AusPlots_Extracted_Data/Growth_Type_Classification.csv", header = F) %>%
+growth.form.classification <- read.csv("DATASETS/GROWTH_FORM_TO_VEG_TYPE_DEFINITIONS/Growth_Type_Classification.csv", header = F) %>%
   mutate(V2 = if_else(is.na(V2), 'Other_Veg', V2)) %>% # <-- convert the NA into 'other'
   rename(major_growth_form = V2) %>%
   mutate(growth_form = PI_growth_forms_names) # <- now the column names and growth form names will follow the same naming scheme
   
 # Classify all growth forms
 PI_classified <- PI %>% left_join(growth.form.classification, by = 'growth_form')
+
+# Now I want to obtain the major growth forms for all of the site visits 
+
+site_unique <- unique(PI_classified$site_unique) # all site visit ID
+growth_form_pc_data <- data.frame() # data to append to 
+pb <- txtProgressBar(min = 1, max = length(site_unique), style = 3)
+counter <- 1
+for (s in site_unique) {
+  setTxtProgressBar(pb, counter)
+  PI_visit <- PI_classified %>% subset(site_unique == s) # subset by site ID 
+  growth_form_pc <- calc_major_growth_form_pc(PI_visit, 'HD')
+  if(is.table(growth_form_pc)){ # what to do if the function returns NA due to (no valid PI)
+    growth_form_pc['site_unique'] <- s # Append the site visit ID to the dataset
+    growth_form_pc_data <- bind_rows(growth_form_pc_data, growth_form_pc) # Append the data to the complete dataset 
+  } else {
+    print(paste(s, 'has no valid PI'))
+  }
+  counter <- counter +1
+}
+
+growth_form_pc_data <- growth_form_pc_data %>%
+  mutate(Grass = as.numeric(Grass),
+         Shrub = as.numeric(Shrub),
+         Tree = as.numeric(Tree),
+         vegetation_type = unlist(
+           apply(growth_form_pc_data,
+                 MARGIN = 1,
+                 FUN = classify)
+           ),
+         site_location_name = unlist(
+           lapply(site_unique,
+                  FUN = get_location_name)
+           )
+         )
+
+
+# Save the Data 
+write.csv(growth_form_pc_data, 'DATASETS/AusPlots_VegType_PC_Height_Rule.csv',)
+
+# Now Aggregate by site visit
+
+PC_agg <- aggregate(
+  round(growth_form_pc_data[,c('Grass', 'Shrub', 'Tree')],1),
+  by = list(growth_form_pc_data$site_location_name),
+  FUN = mean
+) %>% rename(site_location_name = Group.1) %>%
+  mutate(vegetation_type = unlist(apply(., MARGIN = 1, FUN = classify)))
+
+# Save the agg Data 
+write.csv(PC_agg, 'AusPlots_Agg_VegType_PC_Height_Rule.csv',)
+
+
+# Sanity Checks ---------------------------------------------------------------------------------------------------
+
+
 site_PI_example <- PI_classified  %>%
   subset(site_unique == 'NTAARP0004-58932')
 
@@ -132,52 +187,3 @@ calc_major_growth_form_pc(PI_test3, species_name = 'HD')
 
 # Consistent
 
-# Now I want to obtain the major growth forms for all of the site visits 
-
-site_unique <- unique(PI_classified$site_unique) # all site visit ID
-growth_form_pc_data <- data.frame() # data to append to 
-pb <- txtProgressBar(min = 1, max = length(site_unique), style = 3)
-counter <- 1
-for (s in site_unique) {
-  setTxtProgressBar(pb, counter)
-  PI_visit <- PI_classified %>% subset(site_unique == s) # subset by site ID 
-  growth_form_pc <- calc_major_growth_form_pc(PI_visit, 'HD')
-  if(is.table(growth_form_pc)){ # what to do if the function returns NA due to (no valid PI)
-    growth_form_pc['site_unique'] <- s # Append the site visit ID to the dataset
-    growth_form_pc_data <- bind_rows(growth_form_pc_data, growth_form_pc) # Append the data to the complete dataset 
-  } else {
-    print(paste(s, 'has no valid PI'))
-  }
-  counter <- counter +1
-}
-
-growth_form_pc_data <- growth_form_pc_data %>%
-  mutate(Grass = as.numeric(Grass),
-         Shrub = as.numeric(Shrub),
-         Tree = as.numeric(Tree),
-         vegetation_type = unlist(
-           apply(growth_form_pc_data,
-                 MARGIN = 1,
-                 FUN = classify)
-           ),
-         site_location_name = unlist(
-           lapply(site_unique,
-                  FUN = get_location_name)
-           )
-         )
-
-
-# Save the Data 
-write.csv(growth_form_pc_data, '../DATASETS/AusPlots_Extracted_Data/Final/AusPlots_VegType_PC_Height_Rule.csv',)
-
-# Now Aggregate by site visit
-
-PC_agg <- aggregate(
-  round(growth_form_pc_data[,c('Grass', 'Shrub', 'Tree')],1),
-  by = list(growth_form_pc_data$site_location_name),
-  FUN = mean
-) %>% rename(site_location_name = Group.1) %>%
-  mutate(vegetation_type = unlist(apply(., MARGIN = 1, FUN = classify)))
-
-# Save the agg Data 
-write.csv(PC_agg, '../DATASETS/AusPlots_Extracted_Data/Final/AusPlots_Agg_VegType_PC_Height_Rule.csv',)
