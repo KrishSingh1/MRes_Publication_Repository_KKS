@@ -23,7 +23,7 @@ library(magick)
 # Main --------------------------------------------------------------------
 
 theil_sen_reg <- read.csv('DATASETS/AusPlots_Theil_Sen_Regression_Stats_Signf.csv')
-veg_type <- read.csv('../DATASETS/AusPlots_Agg_VegType_PC_Height_Rule.csv')
+veg_type <- read.csv('DATASETS/AusPlots_Agg_VegType_PC_Height_Rule.csv')
 
 # Combine the datasets
 theil_sen_reg_copy <- theil_sen_reg %>%

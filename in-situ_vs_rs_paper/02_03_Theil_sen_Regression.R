@@ -41,7 +41,7 @@ for (f in fractions) {
 temp[fractions_col_names] <- NA
 
 counter <- 1
-pb <- txtProgressBar(min = counter, max = length(file.names), style = 3)
+pb <- txtProgressBar(min = counter, max = length(file.names) + 1, style = 3)
 for (f in file.names) { # Iterate through each site 
   setTxtProgressBar(pb, counter)
   # Keep track of the progress 
@@ -51,10 +51,10 @@ for (f in file.names) { # Iterate through each site
   fraction_slopes <- c()
   for (fraction in fractions) { # calc slope/intercept via thei-sen reg for each fraction
     dea_fc <- fread(paste0(directory, f, '.csv')) %>%
-      mutate(time = ymd_hms(time)) 
+      mutate(time_ymd = ymd(time_ymd)) 
     
 
-    formula <- as.formula(paste0(fraction, ' ~ ', 'time'))
+    formula <- as.formula(paste0(fraction, ' ~ ', 'time_ymd'))
     t_s <- theilsen(formula, data = dea_fc, x = T, y = T, model = TRUE)
     fraction_slopes <- c(fraction_slopes, 
                          t_s$coefficients[2], # slope 
@@ -95,3 +95,11 @@ for (i in c('pv_filter', 'npv_filter', 'bs_filter')){
 
 
 fwrite(thiel_sen_data,'DATASETS/AusPlots_Theil_Sen_Regression_Stats_Signf.csv', row.names=FALSE)
+
+
+# Visualise The timeseries  ---------------------------------------------------------------------------------------
+
+
+
+
+

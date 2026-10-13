@@ -203,8 +203,8 @@ if (fraction == 'pv'){
 
 # SAABHC0004 --------------------------------------------------------------
 example_site <- 'SAABHC0004'
-dea_fc_path <- 'DATASETS/DEA_FC_PROCESSED/MODELLED_PREPROCESSED/'
-dea_fc_path <- paste0(dea_fc_path, 'Input_DataSet_', example_site, '.csv')
+dea_fc_path <- 'DATASETS/DEA_FC_PROCESSED/PROCESSED/'
+dea_fc_path <- paste0(dea_fc_path, example_site, '.csv')
 dea_fc <- read.csv(dea_fc_path)
 
 evaluation.data.2 <- evaluation_fc %>%
@@ -275,8 +275,8 @@ t <- ggplot(data = dea_fc, aes(x = as.Date(time)))  +
 
 # QDAEIUQ0006 -------------------------------------------------------------
 example_site <- 'QDAEIU0006'
-dea_fc_path <- 'DATASETS/DEA_FC_PROCESSED/MODELLED_PREPROCESSED/'
-dea_fc_path <- paste0(dea_fc_path, 'Input_DataSet_', example_site, '.csv')
+dea_fc_path <- 'DATASETS/DEA_FC_PROCESSED/PROCESSED/'
+dea_fc_path <- paste0(dea_fc_path, example_site, '.csv')
 dea_fc <- read.csv(dea_fc_path)
 
 evaluation.data.2 <- evaluation_fc %>%
