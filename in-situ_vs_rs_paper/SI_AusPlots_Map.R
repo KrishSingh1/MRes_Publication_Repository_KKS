@@ -12,7 +12,7 @@ library(dplyr)
 library(ozmaps)
 library(RColorBrewer)
 library(grDevices)
-library(raster)
+library(terra)
 library(ggnewscale)
 
 
@@ -22,8 +22,8 @@ library(ggnewscale)
 
 
 # Set up Raster 
-bioclimatic_region_tiff <- "DATASETS/Australian_Bioclimatic_Regions.tif"
-bio_raster <- raster(bioclimatic_region_tiff)
+bioclimatic_region_tiff <- "DATASETS/BIOCLIMATIC_REGIONS/Australian_Bioclimatic_Regions.tif"
+bio_raster <- terra::rast(bioclimatic_region_tiff)
 
 bio_df <- bio_raster %>% 
   as.data.frame(xy = TRUE) %>%

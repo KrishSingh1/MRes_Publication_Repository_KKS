@@ -124,8 +124,8 @@ combined <- remote_long %>%
             by = c('site_unique', 'fraction_type', 'time', 'site_location_name',
                    'visit_start_date', 'other'))  %>% 
   left_join(veg.type.agg) %>%
-  filter(!is.na(fraction_type)) %>%
-  filter(!is.na(on_ground_value))
+  dplyr::filter(!is.na(fraction_type)) %>%
+  dplyr::filter(!is.na(on_ground_value))
   
 
 write.csv(combined, paste0('DATASETS/', file_name))

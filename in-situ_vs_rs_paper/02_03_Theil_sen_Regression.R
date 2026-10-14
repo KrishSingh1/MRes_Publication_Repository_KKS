@@ -70,9 +70,9 @@ for (f in file.names) { # Iterate through each site
 }
 
 thiel_sen_data <- temp %>% 
-  filter(!is.na(site_location_name)) %>% 
+  dplyr::filter(!is.na(site_location_name)) %>% 
   remove_rownames() %>% 
-  mutate(pv_filter_slope_yr = as.numeric(pv_filter_slope) * 365,
+  dplyr::mutate(pv_filter_slope_yr = as.numeric(pv_filter_slope) * 365,
          npv_filter_slope_yr = as.numeric(npv_filter_slope) * 365,
          bs_filter_slope_yr = as.numeric(bs_filter_slope) * 365)
 

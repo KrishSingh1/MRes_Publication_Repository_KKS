@@ -135,55 +135,55 @@ PC_agg <- aggregate(
   mutate(vegetation_type = unlist(apply(., MARGIN = 1, FUN = classify)))
 
 # Save the agg Data 
-write.csv(PC_agg, 'AusPlots_Agg_VegType_PC_Height_Rule.csv',)
+write.csv(PC_agg, 'DATASETS/AusPlots_Agg_VegType_PC_Height_Rule.csv',)
 
 
 # Sanity Checks ---------------------------------------------------------------------------------------------------
 
 
-site_PI_example <- PI_classified  %>%
-  subset(site_unique == 'NTAARP0004-58932')
-
-calc_major_growth_form_pc(site_PI_example, species_name = 'HD')
-
-# Case checks 
-PI_test1 <- PI_classified  %>%
-  subset(site_location_name == 'NTASTU0004') %>% # <-- we want site NTASTU0004
-  subset(transect == 'E5-W5') %>% # <-- we want transect E5-W5
-  subset(point_number < 11)  # <-- we want the 10th of E5-W5 i.e. first 11 point intercepts
-
-# My expected output is 45.45% Grass and Tree, and 0% Shrub and Other_veg
-
-calc_major_growth_form_pc(PI_test1, species_name = 'HD')
-
-#Other_Veg     Grass     Shrub      Tree 
-#  0.00000  45.45455   0.00000  45.45455 
-# It is indeed consistent 
-
-PI_test2 <- PI_classified  %>%
-  subset(site_unique == 'NSABHC0026-57102') %>% # <-- we want site NTASTU0004
-  subset(transect == 'S2-N2') %>% # <-- we want transect E5-W5
-  subset(point_number < 11)  # <-- we want the 10th of E5-W5 i.e. first 11 point intercepts
-
-
-# Expected output: Grass:  36.35 , Shrub: 9.0909, Tree: 0, Other: 0 
-calc_major_growth_form_pc(PI_test2, species_name = 'HD')
-
-#Other_Veg     Grass     Shrub      Tree 
-# 0.000000 36.363636  9.090909  0.000000 
-
-# Consistent 
-
-PI_test3 <- PI_classified  %>%
-  subset(site_unique == 'SAARIV0001-58046') %>% # <-- we want site NTASTU0004
-  subset(transect == 'E1-W1') %>% # <-- we want transect E5-W5
-  subset(point_number < 21)  # <-- we want the 10th of E5-W5 i.e. first 11 point intercepts
-
-# Expected Output: Tree: 45%, Shub: 5%, Grass: 10% 
-calc_major_growth_form_pc(PI_test3, species_name = 'HD')
-
-#Other_Veg     Grass     Shrub      Tree 
-#        0        10         5        45 
-
-# Consistent
+# site_PI_example <- PI_classified  %>%
+#   subset(site_unique == 'NTAARP0004-58932')
+# 
+# calc_major_growth_form_pc(site_PI_example, species_name = 'HD')
+# 
+# # Case checks 
+# PI_test1 <- PI_classified  %>%
+#   subset(site_location_name == 'NTASTU0004') %>% # <-- we want site NTASTU0004
+#   subset(transect == 'E5-W5') %>% # <-- we want transect E5-W5
+#   subset(point_number < 11)  # <-- we want the 10th of E5-W5 i.e. first 11 point intercepts
+# 
+# # My expected output is 45.45% Grass and Tree, and 0% Shrub and Other_veg
+# 
+# calc_major_growth_form_pc(PI_test1, species_name = 'HD')
+# 
+# #Other_Veg     Grass     Shrub      Tree 
+# #  0.00000  45.45455   0.00000  45.45455 
+# # It is indeed consistent 
+# 
+# PI_test2 <- PI_classified  %>%
+#   subset(site_unique == 'NSABHC0026-57102') %>% # <-- we want site NTASTU0004
+#   subset(transect == 'S2-N2') %>% # <-- we want transect E5-W5
+#   subset(point_number < 11)  # <-- we want the 10th of E5-W5 i.e. first 11 point intercepts
+# 
+# 
+# # Expected output: Grass:  36.35 , Shrub: 9.0909, Tree: 0, Other: 0 
+# calc_major_growth_form_pc(PI_test2, species_name = 'HD')
+# 
+# #Other_Veg     Grass     Shrub      Tree 
+# # 0.000000 36.363636  9.090909  0.000000 
+# 
+# # Consistent 
+# 
+# PI_test3 <- PI_classified  %>%
+#   subset(site_unique == 'SAARIV0001-58046') %>% # <-- we want site NTASTU0004
+#   subset(transect == 'E1-W1') %>% # <-- we want transect E5-W5
+#   subset(point_number < 21)  # <-- we want the 10th of E5-W5 i.e. first 11 point intercepts
+# 
+# # Expected Output: Tree: 45%, Shub: 5%, Grass: 10% 
+# calc_major_growth_form_pc(PI_test3, species_name = 'HD')
+# 
+# #Other_Veg     Grass     Shrub      Tree 
+# #        0        10         5        45 
+# 
+# # Consistent
 

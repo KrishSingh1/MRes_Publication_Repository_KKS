@@ -9,15 +9,6 @@
 
 library(dplyr)
 library(Ternary)
-library(dplyr)
-library(ausplotsR)
-library(plotly)
-library(plot3D)
-library(ozmaps)
-library(hrbrthemes)
-library(GGally)
-library(viridis)
-library(Ternary)
 library(rsvg)
 
 # Set up ------------------------------------------------------------------
@@ -25,7 +16,7 @@ library(rsvg)
 class_order <- c('Grass', 'Shrub', 'Tree')
 
 ausplots_data <- read.csv('DATASETS/AusPlots_Agg_VegType_PC_Height_Rule.csv') %>%
-  select(c('site_location_name', class_order)  )
+  select(all_of(c('site_location_name', class_order)))
 
 # Make sure to only filter for sites we got DEA FC data for
 ausplots_data_original <- read.csv('DATASETS/DEA_FC_Ground_Truth_Evaluation_complete_Height_Rule_Agg.csv') 
@@ -55,12 +46,6 @@ mySpectrum <- hcl.colors(spectrumBins, palette = "viridis")
 binnedGrowthForm <- cut(PC_agg_norm$mean_pv, spectrumBins)
 pointCol <- mySpectrum[binnedGrowthForm]
 
-TernaryPlot(alab = class_order[1], 
-            blab = class_order[2], 
-            clab = class_order[3],
-            grid.minor.lines = 0)
-TernaryPoints(coordinates = PC_agg_norm[,class_order], col = pointCol, pch = 16)
-
 middle_triangle <- matrix(c(
   50, 50, 0,
   50, 0, 50,
@@ -68,7 +53,22 @@ middle_triangle <- matrix(c(
   50, 50, 0
 ), ncol = 3, byrow = TRUE)
 
-TernaryLines(middle_triangle, col = "red", lwd = 2)
+
+ragg::agg_png(
+  "FIGURES/Figure_S3_Ternary_Plot.png",
+  width = 12,
+  height = 12,
+  units = "cm",
+  res = 600
+)
+
+par(mar = c(0.5, 0.5, 0.5, 0.5))
+Ternary::TernaryPlot(alab = class_order[1], 
+            blab = class_order[2], 
+            clab = class_order[3],
+            grid.minor.lines = 0)
+Ternary::TernaryPoints(coordinates = PC_agg_norm[,class_order], col = pointCol, pch = 16)
+Ternary::TernaryLines(middle_triangle, col = "red", lwd = 2)
 
 # Legend for colour scale
 PlotTools::SpectrumLegend(
@@ -86,8 +86,4 @@ PlotTools::SpectrumLegend(
   title = "Photosynthetic Vegetation Cover (%)"
 )
 
-
-tmp <- tempfile()
-dev.print(svg,tmp)
-rsvg_png(tmp, "FIGURES/Figure_S3_Ternary_Plot.png",height=2000)
-
+dev.off()

@@ -131,10 +131,10 @@ close(pb)
 
 # Sanity Checks ---------------------------------------------------------------------------------------------------
 
-
-plot(st_geometry(site.corners.data.cleaned)) # Plot to check if this roughly makes an Australian shap
-
-query <- 'SATFLB0007'
-site.fc <- get_preprocessed_dea_fc(query, site.corners.data = site.corners.data.cleaned, 
-                                   directory = directory, plot_spatial_extent = T)
+# 
+# plot(st_geometry(site.corners.data.cleaned)) # Plot to check if this roughly makes an Australian shap
+# 
+# query <- 'SATFLB0007'
+# site.fc <- get_preprocessed_dea_fc(query, site.corners.data = site.corners.data.cleaned, 
+#                                    directory = directory, plot_spatial_extent = T)
 
