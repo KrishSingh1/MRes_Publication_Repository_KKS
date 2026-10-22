@@ -2,7 +2,7 @@
 
 The scripts under this repository were written to extract, process, analyse, and generate figures for the paper 'Correspondence...'. They are numbered by the order in which they should be run, as some scripts depend on the outputs of the previous scripts to work as intended. This is done on two levels, where the main section (first two digits) highlights the main preprocessing stage, while the subsections (second two digits) highlights minor functions. Generally, there are no particular order to which the minor subsections should be run given that they share the same sub-section number (second two digits).
 
-The outputs of this script are either under the folder 'in-situ_vs_rs_paper/DATASETS' or 'in-situ_vs_rs_paper/FIGURES' for datasets and figures respectively.
+The inputs/outputs of this script are either under the folder 'in-situ_vs_rs_paper/DATASETS' or 'in-situ_vs_rs_paper/FIGURES' for datasets and figures respectively.
 
 ### 00 Running the automated pipeline
 
@@ -12,14 +12,26 @@ This script runs the entire data processing, analysis, and figure generation pip
 
 ### 01 AusPlots Extraction
 
+|Script| Description | Inputs | Outputs |
+|---|---|---|---|
+|This script queries the AusPlots database to extract data such as plot information, point intercept data, and ancillary data.|   |  site_veg_Final2-0-6.rds: a r data file containing all site data to be extracted from the database including plot information, point intercept data, and ancillary data.
+extracted_Final_site_info_2-0-6.csv: a csv file containing just site information data such as coordinates, and site descriptors.|
+
 **01_01_Ausplots_Veg_Extraction_2-0-6.R**
 - This script queries the AusPlots database to extract data such as plot information, point intercept data, and ancillary data.
+
 - The primary outputs for this script are:
 - site_veg_Final2-0-6.rds: a r data file containing all site data to be extracted from the database including plot information, point intercept data, and ancillary data.
 - extracted_Final_site_info_2-0-6.csv: a csv file containing just site information data such as coordinates, and site descriptors.  
 
 **01_02_AusPlots_Growth_Form_by_Height_Rule.R**
-- This script 
+- This script classifies the vegetation type (grass, shrub, tree) of each site by the plant growth forms dominance from the PI vegetation data using the height rule.
+
+Required Inputs:
+- GROWTH_FORM_TO_VEG_TYPE_DEFINITIONS/Growth_Type_Classification.csv: Contains the encoding of growth forms to vegetation type.
+- 'site_veg_Final2-0-6.rds': a r data file containing all site data to be extracted from the database including plot information, point intercept data, and ancillary data.
+
+
 
 01_02_AusPlots_Extract_CornerPoints.R"
 01_02_AusPlots_FC_Extraction.R
