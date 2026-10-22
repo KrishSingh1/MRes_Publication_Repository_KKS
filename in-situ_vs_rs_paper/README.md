@@ -14,8 +14,7 @@ This script runs the entire data processing, analysis, and figure generation pip
 
 |Script| Description | Inputs | Outputs |
 |---|---|---|---|
-|This script queries the AusPlots database to extract data such as plot information, point intercept data, and ancillary data.|   |  site_veg_Final2-0-6.rds: a r data file containing all site data to be extracted from the database including plot information, point intercept data, and ancillary data.
-extracted_Final_site_info_2-0-6.csv: a csv file containing just site information data such as coordinates, and site descriptors.|
+| **01_01_Ausplots_Veg_Extraction_2-0-6.R** |This script queries the AusPlots database to extract data such as plot information, point intercept data, and ancillary data.|   |  site_veg_Final2-0-6.rds: a r data file containing all site data to be extracted from the database including plot information, point intercept data, and ancillary data. \n extracted_Final_site_info_2-0-6.csv: a csv file containing just site information data such as coordinates, and site descriptors.|
 
 **01_01_Ausplots_Veg_Extraction_2-0-6.R**
 - This script queries the AusPlots database to extract data such as plot information, point intercept data, and ancillary data.
