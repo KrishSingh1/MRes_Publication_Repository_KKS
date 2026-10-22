@@ -1,6 +1,33 @@
-## Description of Code
+## Code under this Repository
+
+The scripts under this repository were written to extract, process, analyse, and generate figures for the paper 'Correspondence...'. They are numbered by the order in which they should be run, as some scripts depend on the outputs of the previous scripts to work as intended. This is done on two levels, where the main section (first two digits) highlights the main preprocessing stage, while the subsections (second two digits) highlights minor functions. Generally, there are no particular order to which the minor subsections should be run given that they share the same sub-section number (second two digits).
+
+The outputs of this script are either under the folder 'in-situ_vs_rs_paper/DATASETS' or 'in-situ_vs_rs_paper/FIGURES' for datasets and figures respectively.
+
+### 00 Running the automated pipeline
+
+**00_Pipeline.R**
+
+This script runs the entire data processing, analysis, and figure generation pipeline by automatically running most of the scripts below in order. Note that this does not include AusPlots and DEA FC extraction to keep consistent with the database version (AusPlots), and the script for DEA FC extraction requires the National Computational Infrastructure to run.
+
+### 01 AusPlots Extraction
+
+**01_01_Ausplots_Veg_Extraction_2-0-6.R**
+- This script queries the AusPlots database to extract data such as plot information, point intercept data, and ancillary data.
+- The primary outputs for this script are:
+- site_veg_Final2-0-6.rds: a r data file containing all site data to be extracted from the database including plot information, point intercept data, and ancillary data.
+- extracted_Final_site_info_2-0-6.csv: a csv file containing just site information data such as coordinates, and site descriptors.  
+
+**01_02_AusPlots_Growth_Form_by_Height_Rule.R**
+- This script 
+
+01_02_AusPlots_Extract_CornerPoints.R"
+01_02_AusPlots_FC_Extraction.R
 
 ### Data Acquisition Code
+
+
+
 
 **AusPlots_FC_Extraction.R**:
 Contains code used to iteratively extract fractional cover from the AusPlots site database using a list of site names. Datasets used:
