@@ -1,4 +1,4 @@
-## Code under this Repository
+# Code under this Repository
 
 The scripts under this repository were written to extract, process, analyse, and generate figures for the paper 'Correspondence...'. They are numbered by the order in which they should be run, as some scripts depend on the outputs of the previous scripts to work as intended. This is done on two levels, where the main section (first two digits) highlights the main preprocessing stage, while the subsections (second two digits) highlights minor functions. Generally, there are no particular order to which the minor subsections should be run given that they share the same sub-section number (second two digits).
 
@@ -6,13 +6,13 @@ The inputs/outputs of this script are either under the folder 'in-situ_vs_rs_pap
 
 For DEA FC Extraction, see [DEA_FC_Extraction folder](#DEA_FC_Extraction folder).
 
-### 00 Running the automated pipeline
+## 00 Running the automated pipeline
 
 ### **00_Pipeline.R**
 
 This script runs the entire data processing, analysis, and figure generation pipeline by automatically running most of the scripts below in order. Note that this does not include AusPlots and DEA FC extraction to keep consistent with the database version (AusPlots), and the script for DEA FC extraction requires the National Computational Infrastructure to run.
 
-### 01 AusPlots Extraction
+## 01 AusPlots Extraction
 
 ### 01_01_Ausplots_Veg_Extraction_2-0-6.R
 - This script queries the AusPlots database to extract data such as plot information, point intercept data, and ancillary data.
@@ -52,8 +52,7 @@ Outputs:
 - AusPlots_VegType_PC_Height_Rule.csv: A csv file containing the percent cover of all vegetation types on a site-visit-basis. 
 - AusPlots_Agg_VegType_PC_Height_Rule.csv: A csv file containing the percent cover of all vegetation types on a site-basis (i.e. the percent cover as been aggregated across each site visit). 
 
-
-### 02 DEA FC Processing
+## 02 DEA FC Processing
 
 ### 02_01_DEA_FC_Preprocessing.R
 For all extracted site-specific DEA FC data. this script performs spatial trimming and spatial aggregation, unmixing error (ue) filters,  and constrains the the time range between 1988-01-01 to 2023-01-01. There is an optional plotting feature (via the function `trim_to_nearest_coord` ) that allows you to see what pixels are being kept for each site. 
