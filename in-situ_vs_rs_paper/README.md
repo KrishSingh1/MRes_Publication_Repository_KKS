@@ -156,8 +156,8 @@ The script plots out:
 Inputs:
 - AusPlots_Theil_Sen_Regression_Stats_Signf.csv (See [02_03_Theil_sen_Regression.R](#02_03_Theil_sen_Regression.R))
 - DEA_FC_Ground_Truth_Evaluation.csv (See [03_01_DEA_Evaluation_Nearest_Point.R](#03_01_DEA_Evaluation_Nearest_Point.R))
-- DEA_FC_PROCESSED/PROCESSED/SAABHC0004.csv (see [02_01_DEA_FC_Preprocessing.R](#02_01_DEA_FC_Preprocessing.R))
-- DEA_FC_PROCESSED/PROCESSED/QDAEIU0006.csv (see [02_01_DEA_FC_Preprocessing.R](#02_01_DEA_FC_Preprocessing.R))
+- DEA_FC_PROCESSED/PROCESSED/SAABHC0004.csv (see [02_02_Savitizky_Golay_Filter.R](#02_02_Savitizky_Golay_Filter.R))
+- DEA_FC_PROCESSED/PROCESSED/QDAEIU0006.csv (see [02_02_Savitizky_Golay_Filter.R](#02_02_Savitizky_Golay_Filter.R))
 
 
 ## SI and other main text supporting analyses
