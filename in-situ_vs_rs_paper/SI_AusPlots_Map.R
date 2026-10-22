@@ -6,12 +6,8 @@
 # Libraries ----------------------------------------------------------------
 
 library(ggplot2)
-library(patchwork)
-library(cowplot)
 library(dplyr)
 library(ozmaps)
-library(RColorBrewer)
-library(grDevices)
 library(terra)
 library(ggnewscale)
 
@@ -64,7 +60,7 @@ ausplots_map <- ggplot() +
               mapping = aes(x = x,
                             y = y, 
                             fill = `Bioclimatic Region`)) +
-  geom_sf(data = sf_oz, fill = 'transparent') +
+  geom_sf(data = sf_oz, fill = 'transparent', linewidth = 0.5) +
   scale_fill_manual(values = c('Desert' =  '#FDBF6F',
                                'Cool Temperate' = '#B2DF8A',
                                'Warm Temperate' = '#33A02C',
@@ -90,8 +86,10 @@ ausplots_map <- ggplot() +
   labs(fill = 'Vegetation Type\n(Dominant)',
        shape = 'Vegetation Type\n(Dominant)') +
   theme_bw() +
-  ylab('') +
-  xlab('') +
+  theme(text = element_text(family = 'serif', size = 14),
+        panel.grid = element_line(colour = 'grey80')) +
+  ylab('Latitude') +
+  xlab('Longitude') +
   ylim(c(-45, -10)) +
   xlim(c(112, 155))
 

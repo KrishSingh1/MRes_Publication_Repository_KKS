@@ -4,7 +4,6 @@
 
 # Library -----------------------------------------------------------------
 
-library(plotly)
 library(ggplot2)
 library(dplyr)
 library(caret)
@@ -116,72 +115,80 @@ test <- stats_fc_pv %>%
   left_join(theil_sen_reg_copy, by = c('site_location_name'))
   
 # Graphic -----------------------------------------------------------------
-lims <- c(-25, 25)
+lims <- c(-40, 40)
 
 # PV ----------------------------------------------------------------------
 pv_insitu <- ggplot(data = test, mapping = aes(y = pv_filter_slope_yr, x = slope_insitu_pv_yr)) +
   geom_point() + geom_smooth(method =  'lm', size = 0.5) +
   theme_bw() +
-  ggpmisc::stat_poly_eq(mapping = use_label(c("R2")), method = 'lm') +
+  ggpmisc::stat_poly_eq(family = 'serif',mapping = use_label(c("R2")), method = 'lm') +
   geom_abline(color = 'red', lty = 2, size = 1) +
   ylab('Long Term Trend (%PV/yr)') +
   xlab('Short Term Trend (in-situ %PV/yr)') +
-  coord_fixed(ratio= 1, xlim = lims, ylim = lims)
+  coord_fixed(ratio= 1, xlim = lims, ylim = lims) +
+  theme(text = element_text(family = 'serif'),panel.grid = element_line(colour = 'grey80'))
 
 pv_dea <- ggplot(data = test, mapping = aes(y = pv_filter_slope_yr, x = slope_rs_pv_yr)) +
   geom_point() + geom_smooth(method =  'lm', size = 0.5) +
   theme_bw() +
-  ggpmisc::stat_poly_eq(mapping = use_label(c("R2")), method = 'lm') +
+  ggpmisc::stat_poly_eq(family = 'serif',mapping = use_label(c("R2")), method = 'lm') +
   geom_abline(color = 'red', lty = 2, size = 1) +
   ylab('Long Term Trend (%PV/yr)') +
   xlab('Short Term Trend (DEA %PV/yr)') +
-  coord_fixed(ratio= 1, xlim = lims, ylim = lims)
+  coord_fixed(ratio= 1, xlim = lims, ylim = lims)+
+  theme(text = element_text(family = 'serif'),panel.grid = element_line(colour = 'grey80'))
 
 # NPV ---------------------------------------------------------------------
 npv_insitu <- ggplot(data = test, mapping = aes(y = npv_filter_slope_yr, x = slope_insitu_npv_yr)) +
   geom_point() + geom_smooth(method =  'lm', size = 0.5) + 
   theme_bw() +
-  ggpmisc::stat_poly_eq(mapping = use_label(c("R2")), method = 'lm') +
+  ggpmisc::stat_poly_eq(family = 'serif',mapping = use_label(c("R2")), method = 'lm') +
   geom_abline(color = 'red', lty = 2, size = 1) +
   ylab('Long Term Trend (%NPV/yr)') +
   xlab('Short Term Trend (in-situ %NPV/yr)') + 
-  coord_fixed(ratio= 1, xlim = lims, ylim = lims)
+  coord_fixed(ratio= 1, xlim = lims, ylim = lims)+
+  theme(text = element_text(family = 'serif'),panel.grid = element_line(colour = 'grey80'))
 
 npv_dea <- ggplot(data = test, mapping = aes(y = npv_filter_slope_yr, x = slope_rs_npv_yr)) +
   geom_point() + geom_smooth(method =  'lm', size = 0.5) + 
   theme_bw() +
-  ggpmisc::stat_poly_eq(mapping = use_label(c("R2")), method = 'lm') +
+  ggpmisc::stat_poly_eq(family = 'serif',mapping = use_label(c("R2")), method = 'lm') +
   geom_abline(color = 'red', lty = 2, size = 1) +
   ylab('Long Term Trend (%NPV/yr)') +
   xlab('Short Term Trend (DEA %NPV/yr)') + 
-  coord_fixed(ratio= 1, xlim = lims, ylim = lims)
+  coord_fixed(ratio= 1, xlim = lims, ylim = lims)+
+  theme(text = element_text(family = 'serif'),panel.grid = element_line(colour = 'grey80'))
 
 # Bare Soil ---------------------------------------------------------------
 bs_insitu <- ggplot(data = test, mapping = aes(y = bs_filter_slope_yr, x = slope_insitu_bs_yr)) +
   geom_point() + geom_smooth(method =  'lm', size = 0.5) + 
-  theme_bw() + ggpmisc::stat_poly_eq(mapping = use_label(c("R2")), method = 'lm') +
+  theme_bw() + ggpmisc::stat_poly_eq(family = 'serif',mapping = use_label(c("R2")), method = 'lm') +
   geom_abline(color = 'red', lty = 2, size = 1) +
   ylab('Long Term Trend (%BS/yr)') +
   xlab('Short Term Trend (in-situ %BS/yr)') + 
-  coord_fixed(ratio= 1, xlim = lims, ylim = lims)
+  coord_fixed(ratio= 1, xlim = lims, ylim = lims)+
+  theme(text = element_text(family = 'serif'),panel.grid = element_line(colour = 'grey80'))
 
 bs_dea <- ggplot(data = test, mapping = aes(y = bs_filter_slope_yr, x = slope_rs_bs_yr)) +
   geom_point() + geom_smooth(method =  'lm', size = 0.5) + 
-  theme_bw() + ggpmisc::stat_poly_eq(mapping = use_label(c("R2")), method = 'lm') +
+  theme_bw() + ggpmisc::stat_poly_eq(family = 'serif',mapping = use_label(c("R2")), method = 'lm') +
   geom_abline(color = 'red', lty = 2, size = 1) +
   ylab('Long Term Trend (%BS/yr)') +
   xlab('Short Term Trend (DEA %BS/yr)') + 
-  coord_fixed(ratio= 1, xlim = lims, ylim = lims)
+  coord_fixed(ratio= 1, xlim = lims, ylim = lims)+
+  theme(text = element_text(family = 'serif'),panel.grid = element_line(colour = 'grey80'))
 
 # Combine Plot ------------------------------------------------------------
 combined_plot_insitu <- plot_grid(pv_insitu, npv_insitu, 
                            bs_insitu, ncol = 3,
-                           labels = c("a)", "b)", "c)"))
+                           labels = c("a)", "b)", "c)"),
+                           label_fontfamily = 'serif')
 combined_plot_insitu
 
 combined_plot_DEA <- plot_grid(pv_dea, npv_dea, 
                                   bs_dea, ncol = 3,
-                                  labels = c("d)", "e)", "f)"))
+                                  labels = c("d)", "e)", "f)"),
+                               label_fontfamily = 'serif')
 combined_plot_DEA
 
 # Add PV timeseries of some example sites ---------------------------------
@@ -222,7 +229,7 @@ t <- ggplot(data = dea_fc, aes(x = as.Date(time)))  +
                date_breaks = ('5 years'),
                limits = c(as.Date('1987-01-01'), 
                           as.Date('2022-12-31'))) +
-  xlab('Time') +
+  xlab('') +
   ylab('PV (%)') +
   # The on ground fractional cover measurements 
   geom_point(data = evaluation.data.2,
@@ -256,17 +263,22 @@ t <- ggplot(data = dea_fc, aes(x = as.Date(time)))  +
               slope = theil_sen_reg_subset[[paste0(fraction, '_filter', '_slope')]],
               color = 'red', size = 0.5) +
   theme_bw() +
-  annotate('text', x = as.Date('1987-01-01'), 
+  theme(text = element_text(family = 'serif'), 
+        panel.grid.major.x = element_line(colour = 'grey80'),
+        panel.grid.minor.x = element_line(colour = 'grey80'),
+        axis.title = element_text(size = 14),
+        axis.text = element_text(size = 12)) +
+  annotate('text', family = 'serif', x = as.Date('1987-01-01'), 
            y = celing - 5, 
            label = paste0("LT (DEA FC)", ' = ',round(theil_sen_reg_subset[[paste0(fraction, '_filter', '_slope_yr')]],2), ' %PV/yr'), 
            color = "red", size = 3.5,
            hjust = 0) +
-  annotate('text', x = as.Date('1987-01-01'), 
+  annotate('text', family = 'serif', x = as.Date('1987-01-01'), 
            y = celing - 5 - 1*(10), 
            label = paste0('ST (AusPlots FC)', ' = ', round(theil_sen_reg_subset[[paste0('slope_insitu_',fraction ,'_yr')]],2), ' %PV/yr'),
            color = "black", size = 3.5,
            hjust = 0) +
-  annotate('text', x = as.Date('1987-01-01'),
+  annotate('text', family = 'serif', x = as.Date('1987-01-01'),
            y = celing - 5 - 2*(10), 
            label = paste0('ST (DEA FC)',' = ', round(theil_sen_reg_subset[[paste0('slope_rs_', fraction, '_yr')]],2), ' %PV/yr'),
            color = "blue", 
@@ -329,17 +341,22 @@ t2 <- ggplot(data = dea_fc, aes(x = as.Date(time)))  +
               slope = theil_sen_reg_subset[[paste0(fraction, '_filter', '_slope')]],
               color = 'red', size = 0.5) +
   theme_bw() +
-  annotate('text', x = as.Date('1987-01-01'), 
+  theme(text = element_text(family = 'serif'),
+        panel.grid.major.x = element_line(colour = 'grey80'),
+        panel.grid.minor.x = element_line(colour = 'grey80'),
+        axis.title = element_text(size = 14),
+        axis.text = element_text(size = 12)) +
+  annotate('text', family = 'serif', x = as.Date('1987-01-01'), 
            y = celing - 5, 
            label = paste0("LT (DEA FC)", ' = ',round(theil_sen_reg_subset[[paste0(fraction, '_filter', '_slope_yr')]],2), ' %PV/yr'), 
            color = "red", size = 3.5,
            hjust = 0) +
-  annotate('text', x = as.Date('1987-01-01'), 
+  annotate('text', family = 'serif', x = as.Date('1987-01-01'), 
            y = celing - 5 - 1*(10), 
            label = paste0('ST (AusPlots FC)', ' = ', round(theil_sen_reg_subset[[paste0('slope_insitu_',fraction ,'_yr')]],2), ' %PV/yr'),
            color = "black", size = 3.5,
            hjust = 0) +
-  annotate('text', x = as.Date('1987-01-01'),
+  annotate('text', family = 'serif', x = as.Date('1987-01-01'),
            y = celing - 5 - 2*(10), 
            label = paste0('ST (DEA FC)',' = ', round(theil_sen_reg_subset[[paste0('slope_rs_', fraction, '_yr')]],2), ' %PV/yr'),
            color = "blue", 
@@ -350,7 +367,8 @@ t2 <- ggplot(data = dea_fc, aes(x = as.Date(time)))  +
 final_combined_plot <- plot_grid(combined_plot_insitu,
                                  combined_plot_DEA,
                                  t, t2, cols =1,
-          labels = c(' ', ' ', 'g)', 'h)'))
+          labels = c(' ', ' ', 'g)', 'h)'),
+          label_fontfamily = 'serif')
 plot(final_combined_plot)
 ggsave(plot = final_combined_plot,
        height = 18,

@@ -1,24 +1,38 @@
-### DEA FC Reprocessing ###
-# Trim spatial data + filter by ue
-# Krish Singh
-# 20240122
+####### DEA FC Reprocessing #######
+# Krish K. Singh
+# 22 April. 2024
+# Objective: 
+# Process DEA FC data site by site by:
+#  1) Trimming the spatial data to meet closer to the site boundaries 
+#  2) Filter the data using a unmixing error threshold 
+#  3) Keep the data bound within 1988 to 2022 (end of)
+
+# Processing Steps:
+# 1. Obtain all coordinate points for each sites via the published corner points 
+# 2. Convert the coordinates from the corner points into EPSG 3577
+# 3. Read in the DEA FC from the site 
+# 4. Using the corner points from the published corner points, subset the DEA FC
+#    --> such that all internal points are kept 
+# 5. Filter the DEA FC to include all points under ue <= 25.5
+# 6. Filter the DEA FC to keep time interval bound between 1988-01-01 to 2022-12-31s
+# 7. Perform Spatial Averaging by the mean and by the date of the satelite image 
 
 # Library -----------------------------------------------------------------
 
 library(data.table)
-library(ncdf4)
 library(dplyr)
-library(sf)
-library(ggplot2)
-library(ausplotsR)
-library(sfheaders)
 library(lubridate)
-
+library(ggplot2)
+library(sf)
+library(sfheaders)
 
 # Functions ---------------------------------------------------------------
 
+
 get_preprocessed_dea_fc <- function(query, directory, site.corners.data,
-                                    ue_filter = 25.5, plot_spatial_extent = FALSE){
+                                    ue_filter = 25.5, plot_spatial_extent = FALSE,
+                                    time_interval_start = as.Date('1988-01-01'),
+                                    time_interval_end   = as.Date('2023-01-01')){
   dea.fc <- tryCatch({
     temp_read <- fread(paste0(directory, "/", query, ".csv")) # use data.table for faster processing
     test.dea.trimed <- trim_to_nearest_coord(site.corners.data = site.corners.data,
@@ -31,6 +45,9 @@ get_preprocessed_dea_fc <- function(query, directory, site.corners.data,
       dplyr::filter(ue <= ue_filter) %>% # ue filter 
       dplyr::mutate(time = ymd_hms(time),
                     time_ymd = as_date(time)) %>% 
+      dplyr::filter(dplyr::between(time_ymd,
+                            left = time_interval_start, 
+                            right =  time_interval_end)) %>%  # perform time-
       dplyr::group_by(time_ymd) %>%         # Average all time-point to be a day-resolution 
       dplyr::summarise(across(everything(), .fns = function(x) mean(x, na.rm = T)))
     
@@ -83,15 +100,6 @@ trim_to_nearest_coord <- function(site.corners.data, dea.fc.i, query, buffer = 3
 
 
 # Main --------------------------------------------------------------------
-
-# Alg:
-# 1. Obtain all coordinate points for each sites via the published corner points 
-# 2. Convert the coordinates from the corner points into EPSG 3577
-# 3. Read in the DEA FC from the site 
-# 4. Using the corner points from the published corner points, subset the DEA FC
-#    --> such that all internal points are kept 
-# 5. Filter the DEA FC to include all points under ue <= 25.5
-# 6. Perform Spatial Averaging by the mean and by the date of the satelite image 
 
 directory <- 'DATASETS/DEA_FC_PROCESSED/RawDataCurrent/NewBatchCurrent'
 files <- list.files(directory, pattern = "\\.csv$", full.names = FALSE)

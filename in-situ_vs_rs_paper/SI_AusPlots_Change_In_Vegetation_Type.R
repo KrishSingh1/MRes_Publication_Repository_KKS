@@ -174,7 +174,7 @@ combined_plot <- plot_grid(site_visit_dist, site_veg_type_visit_dist,  ncol = 1,
 plot(combined_plot)
 
 ggsave(filename = 'Supplementary_Information/site_visit_counts.png',
-       dpi = 300, 
+       dpi = 600, 
        plot = combined_plot,
        bg = 'white')
 
@@ -207,7 +207,7 @@ change_in_dom_veg_type <- site_change %>%
             nudge_y = 1)
 
 ggsave(filename = 'Supplementary_Information/site_veg_change_dist.png',
-       dpi = 300, 
+       dpi = 600, 
        plot = change_in_dom_veg_type,
        bg = 'white')
 
@@ -285,7 +285,7 @@ for(i in 1:length(example_site_list_names)) {
 change_in_veg_dominance <-plot_grid(plotlist = list_plots_examples, ncol = 3, scale = 1.2)
 ggsave(filename = 'Supplementary_Information/change_in_veg_dominance.png',
        plot = change_in_veg_dominance,
-       dpi = 300,
+       dpi = 600,
        scale = 1.2,
        height = 7,
        width = 13)
@@ -310,7 +310,7 @@ site_transitions_plot <- freq %>%
   
 ggsave(filename = 'Supplementary_Information/site_transitions_plot.png',
        plot = site_transitions_plot,
-       dpi = 300)
+       dpi = 600)
 
 
 # Now Plot the Trends -----------------------------------------------------
@@ -380,7 +380,7 @@ plt_trends <- ggplot(data = site_change_combined,
 
 ggsave(filename = 'Supplementary_Information/pc_per_visit_trends_box_plt.png',
        plot = plt_trends,
-       dpi = 300)
+       dpi = 600)
 
 
 

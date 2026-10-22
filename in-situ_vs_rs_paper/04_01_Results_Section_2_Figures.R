@@ -86,7 +86,7 @@ combined_change <- ggplot(data = one_point,
   coord_obs_pred() +
   xlim(c(0,110)) +
   facet_grid(~fraction_type) +
-  geom_text(data = stats_fc,
+  geom_text(family = 'serif',data = stats_fc,
             hjust = 0, 
             size = 3.5,
             mapping = aes(x = 0, y = 100,
@@ -95,8 +95,14 @@ combined_change <- ggplot(data = one_point,
                                    " + ", round(slope, 2), "x",
                                      ", bias = ", round(bias, 2),
                                    "\nR² = ", round(r2, 2),
-                                   "\nRMSE = ", round(rmse, 2)))) +
+                                   "\nRMSE = ", round(rmse, 2))),
+            family = 'serif') +
   theme_bw() +
+  theme(text = element_text(family = 'serif'),legend.position = "none",
+        axis.title = element_text(size = 14),
+        axis.text  = element_text(size = 12),
+        panel.grid = element_line(colour = 'grey80'),
+        strip.text = element_text(size = 14, face = "bold")) +
   geom_smooth(method = 'lm', color = '#295FFF')
 
 ggsave(plot = combined_change,
@@ -153,7 +159,7 @@ combined_change_veg <- ggplot(
   coord_obs_pred() +
   xlim(c(0,110)) +
   facet_grid(vegetation_type ~ fraction_type) +
-  geom_text(data = stats_fc,
+  geom_text(family = 'serif',data = stats_fc,
             hjust = 0, 
             size = 3.5,
             mapping = aes(x = 0, y = 100,
@@ -164,6 +170,11 @@ combined_change_veg <- ggplot(
                                    "\nR² = ", round(r2, 2),
                                    "\nRMSE = ", round(rmse, 2)))) +
   theme_bw() +
+  theme(text = element_text(family = 'serif'),legend.position = "none",
+        axis.title = element_text(size = 14),
+        axis.text  = element_text(size = 12),
+        panel.grid = element_line(colour = 'grey80'),
+        strip.text = element_text(size = 14, face = "bold")) +
   geom_smooth(method = 'lm',
               color = '#295FFF')
 combined_change_veg
@@ -224,7 +235,7 @@ combined_change <- ggplot(data = change, mapping = aes(x = on_ground_value, y = 
   coord_obs_pred() +
   xlim(c(-100, 100)) +
   facet_grid(~fraction_type) +
-  geom_text(data = stats_fc,
+  geom_text(family = 'serif',data = stats_fc,
             hjust = 0, 
             size = 3.5,
             mapping = aes(x =-100, y = 80,
@@ -235,6 +246,11 @@ combined_change <- ggplot(data = change, mapping = aes(x = on_ground_value, y = 
                                    "\nR² = ", round(r2, 2),
                                    "\nRMSE = ", round(rmse, 2)))) +
   theme_bw() +
+  theme(text = element_text(family = 'serif'),legend.position = "none",
+        axis.title = element_text(size = 14),
+        axis.text  = element_text(size = 12),
+        panel.grid = element_line(colour = 'grey80'),
+        strip.text = element_text(size = 14, face = "bold")) +
   geom_smooth(method = 'lm',
               color = '#295FFF',
   )
@@ -286,7 +302,7 @@ combined_change_veg <- ggplot(data = change, mapping = aes(x = on_ground_value, 
   coord_obs_pred() +
   xlim(c(-100,100)) +
   facet_grid(vegetation_type ~ fraction_type) +
-  geom_text(data = stats_fc,
+  geom_text(family = 'serif',data = stats_fc,
             hjust = 0, 
             size = 3.5,
             mapping = aes(x = -100, y = 80,
@@ -296,7 +312,12 @@ combined_change_veg <- ggplot(data = change, mapping = aes(x = on_ground_value, 
                                    ", bias = ", round(bias, 2),
                                    "\nR² = ", round(r2, 2),
                                    "\nRMSE = ", round(rmse, 2)))) +
-  theme_bw() +
+  theme_bw() + 
+  theme(text = element_text(family = 'serif'),legend.position = "none",
+        axis.title = element_text(size = 14),
+        axis.text  = element_text(size = 12),
+        panel.grid = element_line(colour = 'grey80'),
+        strip.text = element_text(size = 14, face = "bold")) +
   geom_smooth(method = 'lm',
               color = '#295FFF',
   )
@@ -355,7 +376,7 @@ combined_change_veg <- ggplot(
   ) +
   xlim(c(0,45)) +
   facet_grid(vegetation_type ~ fraction_type) +
-  geom_text(data = stats_fc,
+  geom_text(family = 'serif',data = stats_fc,
             hjust = 0, 
             size = 3.5,
             mapping = aes(x = 7.5, y = 70,
@@ -365,6 +386,11 @@ combined_change_veg <- ggplot(
                                    "\np = ", round(p_value_slope, 2),
                                    ", R² = ", round(r2, 2)))) +
   theme_bw() +
+  theme(text = element_text(family = 'serif'),legend.position = "none",
+        axis.title = element_text(size = 14),
+        axis.text  = element_text(size = 12),
+        panel.grid = element_line(colour = 'grey80'),
+        strip.text = element_text(size = 14, face = "bold")) +
   geom_smooth(method = 'lm',
               color = '#295FFF')
 

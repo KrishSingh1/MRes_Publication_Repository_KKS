@@ -15,6 +15,7 @@ library(ggsignif)
 library(grDevices)
 library(rlang)
 library(magick)
+library(ggblend)
 
 
 
@@ -70,32 +71,40 @@ for (i in c('pv_filter', 'npv_filter', 'bs_filter')) {
 
 
 # FIGURE 2 ----------------------------------------------------------------
-
-
 sf_oz <- ozmap("states")
-annotate_properties <- list(x = 115,
+annotate_properties <- list(x = 117,
                          y = -10,
-                         size = 4)
+                         size = 7,
+                         family= "serif")
+theil_sen_col_pal <- list('1' = '#882255', '2' = '#DDCC77', '3' = '#117733')
+theil_sen_col_pal <- list('1' = 'red', '2' = 'yellow', '3' = 'green')
+theil_sen_shape_pal <- list('1' = 25, '2' = 21, '3' = 24)
 
-pl_pv <- ggplot(data = sf_oz) + geom_sf() +
+pl_pv <- ggplot(data = sf_oz) + geom_sf(fill = 'grey90', linewidth = 1) +
   geom_point(data = theil_sen_reg_copy, 
-             mapping = aes(x = longitude, 
-                           y = latitude, 
-                           fill = pv_filter_code),
-             size= 2,
-             alpha = 0.5,
-             shape = 21,
-             color = 'black', 
-             stroke = 0.3,
-             height = 0.3,
-             width = 0.3) + 
-  scale_fill_manual("Slope", values = c('1' = 'red', '2' = 'blue','3' = 'green'),
+                        mapping = aes(x = longitude, 
+                                      y = latitude, 
+                                      fill = pv_filter_code,
+                                      shape = pv_filter_code),
+                        size= 2.5,
+                        alpha = 0.6,
+                        color = 'black', 
+                        stroke = 0.6) *
+  (blend("lighten") + blend("multiply", alpha = 0.5)) +
+  scale_fill_manual("Slope", values = theil_sen_col_pal,
                       labels = c("Negative", "Non Significant", "Positive")) +
+  scale_shape_manual("Slope", values = theil_sen_shape_pal,
+                    labels = c("Negative", "Non Significant", "Positive")) +
   theme_bw() +
-  theme(
+  theme(text = element_text(family = "serif"),
     legend.key = element_rect(fill = "white", color = "black"),  # Box around legend items
-    legend.background = element_rect(fill = "white", color = "black")  # Box around the legend
+    legend.background = element_rect(fill = "white", color = "black"),  # Box around the legend
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 12),
+    panel.grid = element_line(colour = 'grey80')
   ) +
+  xlab('Longitude') +
+  ylab('Latitude') +
   coord_sf(xlim = c(114, 152), ylim = c(-10, -43) ) +
   do.call(
     annotate,
@@ -106,17 +115,31 @@ pl_pv <- ggplot(data = sf_oz) + geom_sf() +
 pl_pv
 
 ## For NPV
-pl_npv <- ggplot(data = sf_oz) + geom_sf() +
+pl_npv <- ggplot(data = sf_oz) + geom_sf(fill = 'grey90', linewidth = 1) +
   geom_point(data = theil_sen_reg_copy, 
-             mapping = aes(x = longitude, y = latitude, fill = npv_filter_code),
-             size= 2.5, alpha = 0.5, shape = 21, color = 'black', stroke = 0.1) + 
-  scale_fill_manual("Slope", values = c('1' = 'red', '2' = 'blue','3' = 'green'),
-                      labels = c("Negative", "Non Significant", "Positive")) +
+             mapping = aes(x = longitude, 
+                           y = latitude, 
+                           fill = npv_filter_code,
+                           shape = npv_filter_code),
+             size= 2.5,
+             alpha = 0.5,
+             color = 'black', 
+             stroke = 0.6) *
+  (blend("lighten") + blend("multiply", alpha = 0.2)) +
+  scale_fill_manual("Slope", values = theil_sen_col_pal,
+                    labels = c("Negative", "Non Significant", "Positive")) +
+  scale_shape_manual("Slope", values = theil_sen_shape_pal,
+                     labels = c("Negative", "Non Significant", "Positive")) +
   theme_bw() +
-  theme(
+  theme(text = element_text(family = "serif"),
     legend.key = element_rect(fill = "white", color = "black"),  # Box around legend items
-    legend.background = element_rect(fill = "white", color = "black")  # Box around the legend
+    legend.background = element_rect(fill = "white", color = "black"),  # Box around the legend
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 12),
+    panel.grid = element_line(colour = 'grey80')
   ) +
+  xlab('Longitude') +
+  ylab('Latitude') +
   coord_sf(xlim = c(114, 152), ylim = c(-10, -43) ) +
   do.call(
     annotate,
@@ -126,43 +149,56 @@ pl_npv <- ggplot(data = sf_oz) + geom_sf() +
 pl_npv
 
 ## For BS
-pl_bs <- ggplot(data = sf_oz) + geom_sf() +
+pl_bs <- ggplot(data = sf_oz) + geom_sf(fill = 'grey90', linewidth = 1) +
   geom_point(data = theil_sen_reg_copy, 
-             mapping = aes(x = longitude, y = latitude, fill = bs_filter_code),
-             size= 2.5, alpha = 0.5, shape = 21, color = 'black', stroke = 0.1) +  
+             mapping = aes(x = longitude, 
+                           y = latitude, 
+                           fill = bs_filter_code,
+                           shape = bs_filter_code),
+             size= 2.5,
+             alpha = 0.5,
+             color = 'black', 
+             stroke = 0.6) *
+  (blend("lighten") + blend("multiply", alpha = 0.2)) +
+  scale_fill_manual("Trend", values = theil_sen_col_pal,
+                    labels = c("Negative", "Non Significant", "Positive")) +
+  scale_shape_manual("Trend", values = theil_sen_shape_pal,
+                     labels = c("Negative", "Non Significant", "Positive")) + 
   theme_bw() +
-  theme(
+  theme(text = element_text(family = "serif"),
     legend.key = element_rect(fill = "white", color = "black"),  # Box around legend items
-    legend.background = element_rect(fill = "white", color = "black")  # Box around the legend
+    legend.background = element_rect(fill = "white", color = "black"),  # Box around the legend
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 14),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 12),
+    panel.grid = element_line(colour = 'grey80')
   ) +
-  scale_fill_manual("Trend", values = c('1' = 'red', '2' = 'blue','3' = 'green'),
-                      labels = c("Negative", "Non Significant", "Positive")) + 
   coord_sf(xlim = c(114, 152), ylim = c(-10, -43) ) +
   do.call(
     annotate,
     c(list("text", label = "c) BS", color = "black"),
       annotate_properties)
   ) +
-  theme(
-    legend.key = element_rect(fill = "white", color = "black"),  # Box around legend items
-    legend.background = element_rect(fill = "white", color = "black"),  # Box around the legend
-  )
+  xlab('Longitude') +
+  ylab('Latitude') 
 pl_bs
 
 legend <- cowplot::get_legend(pl_bs)
 
 # Set up the plots for a gridded plot 
-p1 <- pl_pv + theme(legend.position = "none",
+p1 <- pl_pv + theme(text = element_text(family = "serif"),legend.position = "none",
                     axis.text.x = element_text(angle = 45, hjust = 1)) +
   xlab('')
-p2 <- pl_npv + theme(legend.position = "none",
+p2 <- pl_npv + theme(text = element_text(family = "serif"),legend.position = "none",
                      axis.text.x = element_text(angle = 45, hjust = 1)) +
   ylab('') 
-p3 <- pl_bs + theme(axis.text.x = element_text(angle = 45, hjust = 1),
+p3 <- pl_bs + theme(text = element_text(family = "serif"),axis.text.x = element_text(angle = 45, hjust = 1),
                     legend.position = "none")
 
 
-combined_plot <- plot_grid(p1, p2, p3, ncol = 2)
+combined_plot <- plot_grid(p1, p2, p3, ncol = 2,
+                           label_fontfamily = "serif")
 combined_plot
 
 
@@ -176,9 +212,10 @@ ggsave("FIGURES/Figure_2_Thiel_Sen_Regression_Maps.png",
 
 ggsave("legend.png",
        plot_grid(legend), 
-       width = 2,
-       height = 2, 
-       dpi = 600)
+       width = 3,
+       height = 3, 
+       dpi = 600,
+       scale = 0.7)
 
 
 # Composite the Legend image with the plot image
@@ -199,16 +236,6 @@ image_write(final_img,
             format = 'png',
             flatten = T
             )
-
-# FOR TERN SYMPOSIUM
-
-combined_plot <- plot_grid(p1 + ylab(''),
-                           p2 + xlab(''), 
-                           p3 + xlab('') +
-                             ylab(''),
-                           ncol = 3)
-combined_plot
-
 
 
 # FIGURE 3 ----------------------------------------------------------------
@@ -290,6 +317,11 @@ generate_mean_string <- function(d, group, slope) {
 
 pv_mean_str <- generate_mean_string(theil_sen_reg_copy, 'veg', 'pv')
 
+annotate_properties <- list(y = 1.1 ,
+                            hjust = 1,
+                            size = 4,
+                            family= "serif")
+
 pl_pv <- ggplot(data = theil_sen_reg_copy, 
                 mapping = aes(y = pv_filter_slope_yr, x =vegetation_type)) +  
   theme_bw() + 
@@ -302,22 +334,25 @@ pl_pv <- ggplot(data = theil_sen_reg_copy,
   labs(y = '%PV/yr', x = 'Vegetation Type') +
   geom_boxplot(width = 0.25, alpha = 0) +
   scale_y_continuous(breaks = seq(-0.8, 1.2, 0.2), limits = c(-0.8, 1.2)) +
-  theme(legend.position = "none") +
+  theme(text = element_text(family = "serif"),legend.position = "none",
+        axis.title = element_text(size = 14),
+        axis.text  = element_text(size = 12),
+        panel.grid = element_line(colour = 'grey80')) +
   annotate("text", x = 1, y = 1, label = "a") +
   annotate("text", x = 2, y = 1, label = "a") +
   annotate("text", x = 3, y = 1, label = "a") +
   stat_summary(fun = mean, geom = "point", shape = 21, 
                size = 1, fill = "red") +
   geom_hline(yintercept=0, linetype="dashed", 
-             color = "red") 
+             color = "red")
 
 for (i in 1:length(pv_mean_str)) {
-  pl_pv <- pl_pv + annotate("text",
-                            x = i + .2,
-                            y = 1.1 ,
-                            label = pv_mean_str[[i]],
-                            hjust = 1,
-                            size = 4) 
+  pl_pv <- pl_pv +
+    do.call(
+      annotate,
+      c(list("text", label = pv_mean_str[[i]], x = i + .2),
+        annotate_properties)
+    )
 }
 
 pl_pv
@@ -337,7 +372,10 @@ pl_npv <- ggplot(data = theil_sen_reg_copy,
   labs(y = '%NPV/yr', x = 'Vegetation Type') +
   geom_boxplot(width = 0.25, alpha = 0) +
   scale_y_continuous(breaks = seq(-0.8, 1.2, 0.2), limits = c(-0.8, 1.2)) +
-  theme(legend.position = "none") +
+  theme(text = element_text(family = "serif"),legend.position = "none",
+        axis.title = element_text(size = 14),
+        axis.text  = element_text(size = 12),
+        panel.grid = element_line(colour = 'grey80')) +
   annotate("text", x = 1, y = 1, label = "a") +
   annotate("text", x = 2, y = 1, label = "b") +
   annotate("text", x = 3, y = 1, label = "b")  +
@@ -347,8 +385,11 @@ pl_npv <- ggplot(data = theil_sen_reg_copy,
              color = "red") 
 
 for (i in 1:length(npv_mean_str)) {
-  pl_npv <- pl_npv + annotate("text", x = i + .2, y = 1.1 , label = npv_mean_str[i],
-                              hjust = 1, size = 4) 
+  pl_npv <- pl_npv + do.call(
+    annotate,
+    c(list("text", label = npv_mean_str[i], x = i + .2),
+      annotate_properties)
+  )
 }
 
 
@@ -367,7 +408,10 @@ pl_bs <- ggplot(data = theil_sen_reg_copy,
   labs(y = '%BS/yr', x = 'Vegetation Type') +
   geom_boxplot(width = 0.25, alpha = 0) +
   scale_y_continuous(breaks = seq(-0.8, 1.2, 0.2), limits = c(-0.8, 1.2)) +
-  theme(legend.position = "none") +
+  theme(text = element_text(family = "serif"),legend.position = "none",
+        axis.title = element_text(size = 14),
+        axis.text  = element_text(size = 12),
+        panel.grid = element_line(colour = 'grey80')) +
   annotate("text", x = 1, y = 1, label = "a") +
   annotate("text", x = 2, y = 1, label = "ab") +
   annotate("text", x = 3, y = 1, label = "b") +
@@ -377,11 +421,16 @@ pl_bs <- ggplot(data = theil_sen_reg_copy,
              color = "red")
 
 for (i in 1:length(npv_mean_str)) {
-  pl_bs <- pl_bs + annotate("text", x = i + .2, y = 1.1 , label = bs_mean_str[i],
-                            hjust = 1, size = 4) 
+  pl_bs <- pl_bs + do.call(
+    annotate,
+    c(list("text", label = bs_mean_str[i], x = i + .2),
+      annotate_properties)
+  )
 }
 
-combined_plot <- plot_grid(pl_pv, pl_npv, pl_bs, ncol = 2, labels = c("a)", "b)", "c)"))
+combined_plot <- plot_grid(pl_pv, pl_npv, pl_bs, ncol = 2, 
+                           labels = c("a)", "b)", "c)"),
+                           label_fontfamily = "serif")
 combined_plot
 ggsave(combined_plot, 
        height = 15.28,
@@ -402,7 +451,10 @@ pl_pv <- ggplot(data = theil_sen_reg_copy,
   labs(x = '%PV/yr', y = 'count') +
   geom_histogram(fill = '#3182BD', color = 'black', alpha = 0.9, bins = 40) +
   #scale_y_continuous(breaks = seq(-0.8, 0.8, 0.2), limits = c(-0.8, 0.9)) +
-  theme(legend.position = "none") +
+  theme(text = element_text(family = "serif"),
+        axis.title = element_text(size = 14),
+        axis.text = element_text(size = 12),
+        legend.position = "none") +
   geom_vline(aes(xintercept = mean(pv_filter_slope_yr)), 
              linetype = "dashed", size = 1, color = 'black') +
   geom_vline(aes(xintercept = mean(pv_filter_slope_yr) + sd(pv_filter_slope_yr)), 
@@ -410,11 +462,12 @@ pl_pv <- ggplot(data = theil_sen_reg_copy,
   geom_vline(aes(xintercept = mean(pv_filter_slope_yr) - sd(pv_filter_slope_yr)), 
              linetype = "dashed", size = 1, color = 'red') +
   scale_y_continuous(breaks = seq(0, 150, 20), limits = c(0, 150)) +
-  annotate('text', x = max(theil_sen_reg_copy$pv_filter_slope_yr) * 0.9, 
+  annotate('text', x = max(theil_sen_reg_copy$pv_filter_slope_yr) * 0.85, 
            y = 140, 
+           family = 'serif',
            label = paste0("x\u0305", ' = ',round(mean(theil_sen_reg_copy$pv_filter_slope_yr),4), 
-                          '\ns = ', round(sd(theil_sen_reg_copy$pv_filter_slope_yr),4)), 
-           color = "black", size = 3)
+                          '\ns = ', round(sd(theil_sen_reg_copy$pv_filter_slope_yr),4)),
+           color = "black", size = 4)
 
 pl_pv
 
@@ -425,7 +478,9 @@ pl_npv <- ggplot(data = theil_sen_reg_copy,
   labs(x = '%NPV/yr', y = 'count') +
   geom_histogram(fill = '#3182BD', color = 'black', alpha = 0.9) +
   #scale_y_continuous(breaks = seq(-0.8, 0.8, 0.2), limits = c(-0.8, 0.9)) +
-  theme(legend.position = "none") +
+  theme(text = element_text(family = "serif"),legend.position = "none",
+        axis.title = element_text(size = 14),
+        axis.text = element_text(size = 12),) +
   geom_vline(aes(xintercept = mean(npv_filter_slope_yr)), 
              linetype = "dashed", size = 1, color = 'black') +
   geom_vline(aes(xintercept = mean(npv_filter_slope_yr) + sd(npv_filter_slope_yr)), 
@@ -433,11 +488,12 @@ pl_npv <- ggplot(data = theil_sen_reg_copy,
   geom_vline(aes(xintercept = mean(npv_filter_slope_yr) - sd(npv_filter_slope_yr)), 
              linetype = "dashed", size = 1, color = 'red') +
   scale_y_continuous(breaks = seq(0, 150, 20), limits = c(0, 150)) +
-  annotate('text', x = max(theil_sen_reg_copy$npv_filter_slope_yr) * 0.9, 
+  annotate('text', x = max(theil_sen_reg_copy$npv_filter_slope_yr) * 0.85, 
            y = 140, 
+           family = 'serif',
            label = paste0("x\u0305", ' = ',round(mean(theil_sen_reg_copy$npv_filter_slope_yr),4), 
                           '\ns = ', round(sd(theil_sen_reg_copy$npv_filter_slope_yr),4)), 
-           color = "black", size = 3)
+           color = "black", size = 4)
 
 pl_npv
 
@@ -448,7 +504,9 @@ pl_bs <- ggplot(data = theil_sen_reg_copy,
   labs(x = '%BS/yr', y = 'count') +
   geom_histogram(fill = '#3182BD', color = 'black', alpha = 0.9) +
   #scale_y_continuous(breaks = seq(-0.8, 0.8, 0.2), limits = c(-0.8, 0.9)) +
-  theme(legend.position = "none") +
+  theme(text = element_text(family = "serif"),legend.position = "none",
+        axis.title = element_text(size = 14),
+        axis.text = element_text(size = 12),) +
   geom_vline(aes(xintercept = mean(bs_filter_slope_yr)), 
              linetype = "dashed", size = 1, color = 'black') +
   geom_vline(aes(xintercept = mean(bs_filter_slope_yr) + sd(bs_filter_slope_yr)), 
@@ -456,15 +514,18 @@ pl_bs <- ggplot(data = theil_sen_reg_copy,
   geom_vline(aes(xintercept = mean(bs_filter_slope_yr) - sd(bs_filter_slope_yr)), 
              linetype = "dashed", size = 1, color = 'red') +
   scale_y_continuous(breaks = seq(0, 150, 20), limits = c(0, 150)) +
-  annotate('text', x = max(theil_sen_reg_copy$bs_filter_slope_yr) * 0.9, 
-           y = 140, 
+  annotate('text', x = max(theil_sen_reg_copy$bs_filter_slope_yr) * 0.85, 
+           y = 140,
+           family = 'serif',
            label = paste0("x\u0305", ' = ',round(mean(theil_sen_reg_copy$bs_filter_slope_yr),4), 
                           '\ns = ', round(sd(theil_sen_reg_copy$bs_filter_slope_yr),4)), 
-           color = "black", size = 3)
+           color = "black", size = 4)
 
 pl_bs
 
-combined_plot <- plot_grid(pl_pv, pl_npv, pl_bs, ncol = 2, labels = c("a)", "b)", "c)"))
+combined_plot <- plot_grid(pl_pv, pl_npv, pl_bs, ncol = 2, 
+                           labels = c("a)", "b)", "c)"),
+                           label_fontfamily = 'serif')
 combined_plot
 
 ggsave(combined_plot, 

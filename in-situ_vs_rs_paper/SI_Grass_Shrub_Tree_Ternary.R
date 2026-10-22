@@ -62,7 +62,7 @@ ragg::agg_png(
   res = 600
 )
 
-par(mar = c(0.5, 0.5, 0.5, 0.5))
+par(mar = c(0.5, 0.5, 0.5, 0.5), family = "serif")
 Ternary::TernaryPlot(alab = class_order[1], 
             blab = class_order[2], 
             clab = class_order[3],
@@ -80,9 +80,8 @@ PlotTools::SpectrumLegend(
               length.out = 5)),
     "%"
   ),
-  bty = "n", # No framing box
-  xpd = NA, # Don't clip at margins
-  # title.font = 2, # Bold.  Argument only available in R>3.6
+  bty = "n",
+  xpd = NA, 
   title = "Photosynthetic Vegetation Cover (%)"
 )
 
