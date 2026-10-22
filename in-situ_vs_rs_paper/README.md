@@ -14,14 +14,11 @@ This script runs the entire data processing, analysis, and figure generation pip
 
 |Script| Description | Inputs | Outputs |
 |---|---|---|---|
-| **01_01_Ausplots_Veg_Extraction_2-0-6.R** |This script queries the AusPlots database to extract data such as plot information, point intercept data, and ancillary data.|   |  site_veg_Final2-0-6.rds|
+|01_01_Ausplots_Veg_Extraction_2-0-6.R|This script queries the AusPlots database to extract data such as plot information, point intercept data, and ancillary data.|   |  site_veg_Final2-0-6.rds|
+|01_02_AusPlots_Growth_Form_by_Height_Rule.R|This script classifies the vegetation type (grass, shrub, tree) of each site by the plant growth forms dominance from the PI vegetation data using the height rule.| - GROWTH_FORM_TO_VEG_TYPE_DEFINITIONS/Growth_Type_Classification.csv
+- site_veg_Final2-0-6.rds| - AusPlots_VegType_PC_Height_Rule.csv - site_veg_Final2-0-6.rds|
 
-**01_01_Ausplots_Veg_Extraction_2-0-6.R**
-- This script queries the AusPlots database to extract data such as plot information, point intercept data, and ancillary data.
 
-- The primary outputs for this script are:
-- site_veg_Final2-0-6.rds: a r data file containing all site data to be extracted from the database including plot information, point intercept data, and ancillary data.
-- extracted_Final_site_info_2-0-6.csv: a csv file containing just site information data such as coordinates, and site descriptors.  
 
 **01_02_AusPlots_Growth_Form_by_Height_Rule.R**
 - This script classifies the vegetation type (grass, shrub, tree) of each site by the plant growth forms dominance from the PI vegetation data using the height rule.
